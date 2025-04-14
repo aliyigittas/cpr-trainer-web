@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-CprTrainerBackendApplication<cpr-trainer-backend>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.lpsoft.cpr_trainer_backend.CprTrainerBackendApplication",
+            "projectName": "cpr-trainer-backend",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
