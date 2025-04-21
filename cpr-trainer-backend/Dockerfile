@@ -10,6 +10,8 @@ FROM eclipse-temurin:17-jdk-alpine
 
 RUN apk add --no-cache mysql-client
 
+RUN apk add mariadb-connector-c
+
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar

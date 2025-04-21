@@ -1,6 +1,8 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.sql.DataSource;
 
@@ -72,19 +74,47 @@ public class CprTrainerBackendApplication {
 
     @GetMapping("/createDump")
     public static String createDump() {
-        String dumpCommand = "mysqldump --ssl=0 --databases cpr -u cpr-trainer -pcprTrainer123 -h db > /app/dumps/cpr-dump.sql 2> /app/dumps/error.log 1> /app/dumps/output.log";
+        // --skip-ssl parametresiyle SSL devre dışı bırakılıyor
+        System.out.println("Dump alınıyor...");
+        String dumpCommand;
+        String environment = System.getenv("DOCKER_ENV");
+        if ("true".equals(environment)) {
+            dumpCommand = "mariadb-dump --databases cpr -u cpr-trainer -p'cprTrainer123' -h db --skip-ssl > /app/dumps/cpr.sql";
+        } else{
+            dumpCommand = "mysqldump --databases cpr -u cpr-trainer -p'cprTrainer123' -h localhost > ./../db-dumps/cpr.sql";
+        }
         try {
             Process process = Runtime.getRuntime().exec(new String[] {"sh", "-c", dumpCommand});
-            int exitCode = process.waitFor();  // Bu satırı ekle
-            return "Dump alma işlemi bitti. Exit code: " + exitCode;
+            
+            // Hata ve çıktı loglarını alalım
+            StringBuilder output = new StringBuilder();
+            StringBuilder errorOutput = new StringBuilder();
+            
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                 BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+                while ((line = errorReader.readLine()) != null) {
+                    errorOutput.append(line).append("\n");
+                }
+            }
+            
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Dump alma işlemi başarılı!");
+                return "Dump alındı!\n" + output.toString();
+            } else {
+                return "Dump alma işlemi başarısız!\n" + errorOutput.toString();
+            }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return "Dump alınırken hata oluştu!";
         }
     }
     
-
-
     @PostMapping("/register")
     public String registerUser(@RequestBody String user) {
         try {
@@ -95,6 +125,7 @@ public class CprTrainerBackendApplication {
             //insert to users table
             if (databaseAdapter.registerUser(userData)) {
                 System.out.println("✅ Kullanıcı başarıyla eklendi!");
+                createDump();
             } else {
                 System.err.println("❌ Kullanıcı eklenirken hata oluştu!");
                 return "Error adding user!";

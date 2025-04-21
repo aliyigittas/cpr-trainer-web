@@ -14,6 +14,7 @@ services:
     command: npm run dev
     environment:
       - NODE_ENV=development
+      - VITE_API_URL=http://backend:8080  # Backend API URL'si
     platform: linux/amd64
 
   backend:
@@ -28,6 +29,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: cprTrainer123
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_PROFILES_ACTIVE: dev
+      DOCKER_ENV: "true"  # Docker ortamı için çevresel değişken
     volumes:
       - ./db-dumps:/app/dumps  # Host:Container
     deploy:
@@ -51,7 +53,8 @@ services:
       MYSQL_PASSWORD: cprTrainer123
     volumes:
       - mysql_data:/var/lib/mysql
-      - .docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db-dumps/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./db-dumps/cpr.sql:/docker-entrypoint-initdb.d/cpr.sql
     platform: linux/amd64
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
