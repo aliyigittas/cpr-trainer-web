@@ -23,7 +23,42 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/cpr
+      SPRING_DATASOURCE_USERNAME: cpr-trainer
+      SPRING_DATASOURCE_PASSWORD: cprTrainer123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: dev
+    volumes:
+      - ./db-dumps:/app/dumps  # Host:Container
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 10
     depends_on:
+      - db
       - frontend
     platform: linux/amd64
+  
+  db:
+    image: mysql:8.3
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cpr 
+      MYSQL_USER: cpr-trainer
+      MYSQL_PASSWORD: cprTrainer123
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - .docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    platform: linux/amd64
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+volumes:
+  mysql_data:
+    

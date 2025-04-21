@@ -1,16 +1,36 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.io.IOException;
+
+import javax.sql.DataSource;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootApplication
 @RestController
-@RequestMapping("/api")
 public class CprTrainerBackendApplication {
+
+    private final DatabaseAdapter databaseAdapter;
+
+    @Autowired
+    public CprTrainerBackendApplication(DataSource dataSource) {
+        this.databaseAdapter = new DatabaseAdapter(dataSource);
+    }
+
+    @Bean
+    public DatabaseAdapter databaseAdapter(DataSource dataSource) {
+        return new DatabaseAdapter(dataSource);
+    }
 
 	public static void main(String[] args) {
 		SpringApplication.run(CprTrainerBackendApplication.class, args);
@@ -48,5 +68,42 @@ public class CprTrainerBackendApplication {
     public String addPerformanceData(@RequestBody String userData) {
         System.out.println("Received performance data: " + userData);
         return "Performance data added successfully!";
+    }
+
+    @GetMapping("/createDump")
+    public static String createDump() {
+        String dumpCommand = "mysqldump --ssl=0 --databases cpr -u cpr-trainer -pcprTrainer123 -h db > /app/dumps/cpr-dump.sql 2> /app/dumps/error.log 1> /app/dumps/output.log";
+        try {
+            Process process = Runtime.getRuntime().exec(new String[] {"sh", "-c", dumpCommand});
+            int exitCode = process.waitFor();  // Bu satırı ekle
+            return "Dump alma işlemi bitti. Exit code: " + exitCode;
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return "Dump alınırken hata oluştu!";
+        }
+    }
+    
+
+
+    @PostMapping("/register")
+    public String registerUser(@RequestBody String user) {
+        try {
+            System.out.println("Received user data: " + user);
+            //parse user data from class it will come as json format
+            User userData = new ObjectMapper().readValue(user, User.class);
+
+            //insert to users table
+            if (databaseAdapter.registerUser(userData)) {
+                System.out.println("✅ Kullanıcı başarıyla eklendi!");
+            } else {
+                System.err.println("❌ Kullanıcı eklenirken hata oluştu!");
+                return "Error adding user!";
+            }
+            
+            return "User created successfully: " + userData.getFirstname() + " " + userData.getSurname();
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+            return "Error processing user data!";
+        }
     }
 }

@@ -8,6 +8,8 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jdk-alpine
 
+RUN apk add --no-cache mysql-client
+
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar

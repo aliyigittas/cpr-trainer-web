@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { LogIn, UserPlus } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { useNavigate } from "react-router";
 
 // Login Page Component
 export default function LoginPage() {
+  //use react navigation to redirect to register page
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -11,6 +14,8 @@ export default function LoginPage() {
     e.preventDefault();
     console.log("Login attempt with:", { username, password });
     // Here you would handle authentication
+
+
   };
 
   return (
@@ -127,6 +132,9 @@ export default function LoginPage() {
 
           <div className="mt-6">
             <button
+              onClick={() => {
+                navigate("/register");
+              }}
               type="button"
               className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
             >
