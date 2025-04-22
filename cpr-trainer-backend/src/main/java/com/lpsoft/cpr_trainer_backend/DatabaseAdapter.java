@@ -23,7 +23,7 @@ public class DatabaseAdapter {
         }
     }
 
-    public Boolean addPerformance(Performance performance) {
+    public Boolean savePerformance(Performance performance) {
         try {
             String sql = "INSERT INTO `cpr`.`performances` (" +
                          "uid, feedbackType, meanDepth, meanFreq, stdDepth, stdFreq, " +
@@ -51,6 +51,17 @@ public class DatabaseAdapter {
         } catch (Exception e) {
             System.err.println("❌ Performans eklenirken hata oluştu: " + e.getMessage());
             return false;
+        }
+    }
+
+    public int getUid(String email) {
+        try {
+            String sql = "SELECT id FROM `cpr`.`users` WHERE email = '"+ email + "'";
+            return jdbcTemplate.queryForObject(sql, Integer.class);
+            
+        } catch (Exception e) {
+            System.err.println("❌ Kullanıcı ID'si alınırken hata oluştu: " + e.getMessage());
+            return -1; // Hata durumunda -1 döndür
         }
     }
     

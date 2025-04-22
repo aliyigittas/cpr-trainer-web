@@ -1,5 +1,7 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.sql.Date;
+
 public class Performance {
 
     private int id;
@@ -28,7 +30,9 @@ public class Performance {
 
     private double trainingTime;
 
-    private java.time.LocalDateTime performanceDate;
+    private String performanceDate;
+
+    private double score;
  
     // Constructor
 
@@ -42,7 +46,7 @@ public class Performance {
 
                        int lowDepthCount, int lowFreqCount, int totalCompression,
 
-                       double trainingTime, java.time.LocalDateTime performanceDate) {
+                       double trainingTime, String performanceDate, double score) {
 
         this.id = id;
 
@@ -71,6 +75,8 @@ public class Performance {
         this.trainingTime = trainingTime;
 
         this.performanceDate = performanceDate;
+
+        this.score = score;
 
     }
  
@@ -128,10 +134,13 @@ public class Performance {
 
     public void setTrainingTime(double trainingTime) { this.trainingTime = trainingTime; }
  
-    public java.time.LocalDateTime getPerformanceDate() { return performanceDate; }
+    public String getPerformanceDate() { return performanceDate; }
 
-    public void setPerformanceDate(java.time.LocalDateTime performanceDate) { this.performanceDate = performanceDate; }
+    public void setPerformanceDate(String performanceDate) { this.performanceDate = performanceDate; }
 
+    public double getScore() { return score; }
+
+    public void setScore(double score) { this.score = score; }
 }
 
  

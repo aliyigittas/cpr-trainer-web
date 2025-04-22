@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -66,15 +67,15 @@ public class CprTrainerBackendApplication {
     //     };
     // }
 
-    @PostMapping("/performance")
-    public String addPerformanceData(@RequestBody String performance) {
+    @PostMapping("/savePerformance")
+    public String savePerformanceData(@RequestBody String performance) {
         try {
             System.out.println("Received user data: " + performance);
             //parse user data from class it will come as json format
             Performance performanceData = new ObjectMapper().readValue(performance, Performance.class);
 
             //insert to users table
-            if (databaseAdapter.addPerformance(performanceData)) {
+            if (databaseAdapter.savePerformance(performanceData)) {
                 System.out.println("✅ Performance başarıyla eklendi!");
                 createDump();
             } else {
@@ -150,6 +151,21 @@ public class CprTrainerBackendApplication {
             
             return "User created successfully: " + userData.getFirstname() + " " + userData.getSurname();
         } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+            return "Error processing user data!";
+        }
+    }
+
+    //get uid from email in getmapping
+    
+   @GetMapping("/getUid")
+    public String getUid(@RequestParam String email) {
+        try {
+            System.out.println("Received email: " + email);
+            //parse user data from class it will come as json format
+            return String.valueOf(databaseAdapter.getUid(email));
+            
+        } catch (Exception ex) {
             ex.printStackTrace();
             return "Error processing user data!";
         }
