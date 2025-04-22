@@ -67,9 +67,26 @@ public class CprTrainerBackendApplication {
     // }
 
     @PostMapping("/performance")
-    public String addPerformanceData(@RequestBody String userData) {
-        System.out.println("Received performance data: " + userData);
-        return "Performance data added successfully!";
+    public String addPerformanceData(@RequestBody String performance) {
+        try {
+            System.out.println("Received user data: " + performance);
+            //parse user data from class it will come as json format
+            Performance performanceData = new ObjectMapper().readValue(performance, Performance.class);
+
+            //insert to users table
+            if (databaseAdapter.addPerformance(performanceData)) {
+                System.out.println("✅ Performance başarıyla eklendi!");
+                createDump();
+            } else {
+                System.err.println("❌ Performance eklenirken hata oluştu!");
+                return "Error adding performance!";
+            }
+            
+            return "Performance created successfully: " + performanceData.getId() + "-" + performanceData.getFeedbackType();
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+            return "Error processing performance data!";
+        }
     }
 
     @GetMapping("/createDump")

@@ -22,4 +22,36 @@ public class DatabaseAdapter {
             return false;
         }
     }
+
+    public Boolean addPerformance(Performance performance) {
+        try {
+            String sql = "INSERT INTO `cpr`.`performances` (" +
+                         "uid, feedbackType, meanDepth, meanFreq, stdDepth, stdFreq, " +
+                         "highDepthCount, highFreqCount, lowDepthCount, lowFreqCount, " +
+                         "totalCompression, trainingTime, performanceDate" +
+                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    
+            jdbcTemplate.update(sql,
+                performance.getUid(),
+                performance.getFeedbackType(),
+                performance.getMeanDepth(),
+                performance.getMeanFreq(),
+                performance.getStdDepth(),
+                performance.getStdFreq(),
+                performance.getHighDepthCount(),
+                performance.getHighFreqCount(),
+                performance.getLowDepthCount(),
+                performance.getLowFreqCount(),
+                performance.getTotalCompression(),
+                performance.getTrainingTime(),
+                performance.getPerformanceDate()
+            );
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+    
 }
