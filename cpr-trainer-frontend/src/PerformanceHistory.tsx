@@ -3,6 +3,8 @@ import { Calendar, User, ChevronDown, Filter, Clock } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
 import cprLogo from './assets/cprLogo.jpg';
 import Performance from './types/Performance';
+import { useNavigate } from 'react-router';
+import CPRPerformanceDetailPopup from './PerformanceDetails';
 
 // Theme Context
 
@@ -87,9 +89,16 @@ function CPRPerformanceDashboard() {
   const [filterFeedback, setFilterFeedback] = useState<FeedbackType>('all');
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const filterRef = useRef<HTMLDivElement | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedPerformance, setSelectedPerformance] = useState<Performance | null>(null);
+
+  const handleViewDetails = (performance: Performance) => {
+    setSelectedPerformance(performance);
+    setShowPopup(true);
+  };
 
   //get cookie token
-  
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function getUserInfo(){
@@ -328,7 +337,15 @@ function CPRPerformanceDashboard() {
                 </div>
                 
                 <div className="mt-4 flex justify-end">
-                  <button className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">View Details</button>
+                  <button className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"   onClick={() => handleViewDetails(performance)}
+
+                  >View Details</button>
+                  {showPopup && selectedPerformance && (
+                    <CPRPerformanceDetailPopup
+                      performance={selectedPerformance}
+                      onClose={() => setShowPopup(false)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
