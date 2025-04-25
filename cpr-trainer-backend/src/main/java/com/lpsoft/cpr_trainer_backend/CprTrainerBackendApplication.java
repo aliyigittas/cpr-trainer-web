@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 
 import javax.sql.DataSource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +24,7 @@ public class CprTrainerBackendApplication {
 
     private final DatabaseAdapter databaseAdapter;
 
-    @Autowired
+    //@Autowired
     public CprTrainerBackendApplication(DataSource dataSource) {
         this.databaseAdapter = new DatabaseAdapter(dataSource);
     }
@@ -128,7 +127,7 @@ public class CprTrainerBackendApplication {
                 return "Dump alma işlemi başarısız!\n" + errorOutput.toString();
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return "Dump alınırken hata oluştu!";
         }
     }
@@ -151,7 +150,7 @@ public class CprTrainerBackendApplication {
             
             return "User created successfully: " + userData.getFirstname() + " " + userData.getSurname();
         } catch (JsonProcessingException ex) {
-            ex.printStackTrace();
+            //ex.printStackTrace();
             return "Error processing user data!";
         }
     }

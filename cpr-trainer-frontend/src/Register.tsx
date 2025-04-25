@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LogIn, Save } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
+import { SHA256 } from "crypto-js";
 
 // Registration Page Component
 export default function RegisterPage() {
@@ -10,6 +11,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     firstname: "",
     surname: "",
+    username: "",
     email: "",
     password: "",
     khasID: "",
@@ -28,7 +30,10 @@ export default function RegisterPage() {
     e.preventDefault();
     console.log("Registration attempt with:", formData);
     // Here you would handle registration logic
-    const response = await fetch("/api/register", {
+    // hash password 
+    const hashedPassword = SHA256(formData.password).toString();
+    formData.password = hashedPassword;
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,6 +112,26 @@ export default function RegisterPage() {
               </div>
             </div>
 
+            <div>
+              <label
+                htmlFor="username"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
+                Username
+              </label>
+              <div className="mt-1">
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                  placeholder="Your username"
+                />
+              </div>
+            </div>
             <div>
               <label
                 htmlFor="email"

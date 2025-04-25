@@ -2,6 +2,7 @@ package com.lpsoft.cpr_trainer_backend;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class DatabaseAdapter {
@@ -17,7 +18,7 @@ public class DatabaseAdapter {
             String sql = "INSERT INTO `cpr`.`users` (firstname, surname, email, password, khasID) VALUES (?, ?, ?, ?, ?)";
             jdbcTemplate.update(sql, user.getFirstname(), user.getSurname(), user.getEmail(), user.getPassword(), user.getKhasID());
             return true;
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             System.err.println("❌ Kullanıcı eklenirken hata oluştu: " + e.getMessage());
             return false;
         }
@@ -28,8 +29,8 @@ public class DatabaseAdapter {
             String sql = "INSERT INTO `cpr`.`performances` (" +
                          "uid, feedbackType, meanDepth, meanFreq, stdDepth, stdFreq, " +
                          "highDepthCount, highFreqCount, lowDepthCount, lowFreqCount, " +
-                         "totalCompression, trainingTime, performanceDate" +
-                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                         "totalCompression, score, trainingTime, performanceDate" +
+                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
             jdbcTemplate.update(sql,
                 performance.getUid(),
@@ -43,6 +44,7 @@ public class DatabaseAdapter {
                 performance.getLowDepthCount(),
                 performance.getLowFreqCount(),
                 performance.getTotalCompression(),
+                performance.getScore(),
                 performance.getTrainingTime(),
                 performance.getPerformanceDate()
             );

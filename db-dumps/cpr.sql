@@ -1,28 +1,21 @@
-/*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19-11.4.5-MariaDB, for Linux (x86_64)
+CREATE DATABASE  IF NOT EXISTS `cpr` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `cpr`;
+-- MySQL dump 10.13  Distrib 8.0.38, for macos14 (arm64)
 --
--- Host: db    Database: cpr
+-- Host: localhost    Database: cpr
 -- ------------------------------------------------------
--- Server version	8.3.0
+-- Server version	9.2.0
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*M!100616 SET @OLD_NOTE_VERBOSITY=@@NOTE_VERBOSITY, NOTE_VERBOSITY=0 */;
-
---
--- Current Database: `cpr`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `cpr` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `cpr`;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `performances`
@@ -30,22 +23,23 @@ USE `cpr`;
 
 DROP TABLE IF EXISTS `performances`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `performances` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `uid` int DEFAULT NULL,
-  `feedbackType` varchar(3) DEFAULT NULL,
-  `meanDepth` double DEFAULT NULL,
-  `meanFreq` double DEFAULT NULL,
-  `stdDepth` double DEFAULT NULL,
-  `stdFreq` double DEFAULT NULL,
-  `highDepthCount` int DEFAULT NULL,
-  `highFreqCount` int DEFAULT NULL,
-  `lowDepthCount` int DEFAULT NULL,
-  `lowFreqCount` int DEFAULT NULL,
-  `totalCompression` int DEFAULT NULL,
-  `trainingTime` double DEFAULT NULL,
-  `performanceDate` varchar(100) DEFAULT NULL,
+  `uid` int NOT NULL,
+  `feedbackType` varchar(255) DEFAULT NULL,
+  `meanDepth` double DEFAULT '0',
+  `meanFreq` double DEFAULT '0',
+  `stdDepth` double DEFAULT '0',
+  `stdFreq` double DEFAULT '0',
+  `highDepthCount` int DEFAULT '0',
+  `highFreqCount` int DEFAULT '0',
+  `lowDepthCount` int DEFAULT '0',
+  `lowFreqCount` int DEFAULT '0',
+  `totalCompression` int DEFAULT '0',
+  `score` double DEFAULT '0',
+  `trainingTime` double DEFAULT '0',
+  `performanceDate` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -56,8 +50,7 @@ CREATE TABLE `performances` (
 
 LOCK TABLES `performances` WRITE;
 /*!40000 ALTER TABLE `performances` DISABLE KEYS */;
-INSERT INTO `performances` VALUES
-(1,1,'V',148.21,177.86,58.32,210.28,8,1,1,1,9,5.01,'2025-04-22 15:45:27');
+INSERT INTO `performances` VALUES (1,9,'V',148.21,177.86,58.32,210.28,8,1,1,1,9,50,5.01,'2025-04-22 15:45:27');
 /*!40000 ALTER TABLE `performances` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -67,16 +60,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `firstname` varchar(50) NOT NULL,
-  `surname` varchar(50) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(500) NOT NULL,
-  `khasID` varchar(500) DEFAULT NULL,
+  `firstname` varchar(255) DEFAULT NULL,
+  `surname` varchar(255) DEFAULT NULL,
+  `username` varchar(255) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `khasid` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -85,13 +79,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES
-(1,'Ali','Taş','ali@ali.com','123456','20201701054'),
-(2,'local','test','local@mail.com','1111','1234567890'),
-(3,'local','dump','localdump@mail.com','123456','11111111111'),
-(4,'2231test','local','local@son.com','12345','22222222'),
-(5,'2238docker','a','aaa@aa.com','12345','11111'),
-(6,'2241local','a','aaa@aa.com','12345','111111111');
+INSERT INTO `users` VALUES (1,'Ali','Taş','ali','ali@ali.com','123456','20201701054'),(2,'local','test',NULL,'local@mail.com','1111','1234567890'),(3,'local','dump',NULL,'localdump@mail.com','123456','11111111111'),(4,'2231test','local',NULL,'local@son.com','12345','22222222'),(5,'2238docker','a',NULL,'aaa@aa.com','12345','11111'),(6,'2241local','a',NULL,'aaa@aa.com','12345','111111111'),(7,'John','Doe','johndoe','johndoe@example.com','$2a$10$Uq5aQE69ZRCQVMj3l60/YeV5dIMugbzXcKyVo5kP5EZaCPsPK.c26','12345'),(8,'John','Doe','john','johndoe@example.com','9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08','12345'),(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -102,6 +90,6 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-22 12:45:27
+-- Dump completed on 2025-04-25 17:38:33
