@@ -1,5 +1,7 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.util.List;
+
 import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
@@ -64,7 +66,54 @@ public class DatabaseAdapter {
         } catch (Exception e) {
             System.err.println("❌ Kullanıcı ID'si alınırken hata oluştu: " + e.getMessage());
             return -1; // Hata durumunda -1 döndür
+        } 
+    }
+
+    public Boolean saveDepthArray(List<Double> DepthArray, int uid){
+        int lastPerformanceId = getLastPerformanceByUid(uid);
+        try {
+            for(int i=0; i<DepthArray.size(); i++){
+                
+                    String sql = "INSERT INTO `cpr`.`performanceDetails` (" +
+                                "performanceId, detailType, val" +
+                                ") VALUES (?, ?, ?)";
+            
+                    jdbcTemplate.update(sql, lastPerformanceId,'D', DepthArray.get(i));                
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public Boolean saveFreqArray(List<Double> FreqArray, int uid){
+        int lastPerformanceId = getLastPerformanceByUid(uid);
+        try {
+            for(int i=0; i<FreqArray.size(); i++){
+                
+                    String sql = "INSERT INTO `cpr`.`performanceDetails` (" +
+                                "performanceId, detailType, val" +
+                                ") VALUES (?, ?, ?)";
+            
+                    jdbcTemplate.update(sql, lastPerformanceId,'F', FreqArray.get(i));                
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public int getLastPerformanceByUid(int uid) {
+        try {
+            String sql = "SELECT MAX(id) FROM `cpr`.`performances` WHERE uid = ?";
+            return jdbcTemplate.queryForObject(sql, Integer.class, uid);
+        } catch (Exception e) {
+            System.err.println("❌ Kullanıcı ID'si alınırken hata oluştu: " + e.getMessage());
+            return -1; // Hata durumunda -1 döndür
         }
     }
     
+
 }

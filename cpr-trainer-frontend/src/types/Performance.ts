@@ -14,6 +14,8 @@ type Performance = {
     score: number;
     trainingTime: number;
     performanceDate: string;
+    depthArray: [];
+    freqArray: []
 };
 
 export default Performance;

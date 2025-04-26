@@ -1,5 +1,6 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceDetailsRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
 
@@ -28,6 +30,9 @@ public class AuthController {
     
     @Autowired
     private PerformanceRepository performanceRepository;
+
+    @Autowired
+    private PerformanceDetailsRepository performanceDetailsRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -108,6 +113,26 @@ public class AuthController {
                 System.out.println("No performances found for user ID: " + uid);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(performances);
             }
+            // ⭐ New part: Fetch depth and frequency arrays
+            for (Performance perf : performances) {
+                List<PerformanceDetails> details = performanceDetailsRepository.findByPerformanceId(perf.getId());
+                
+                List<Double> depthArray = new ArrayList<>();
+                List<Double> freqArray = new ArrayList<>();
+                
+                for (PerformanceDetails detail : details) {
+                    if ("D".equals(detail.getDetailType())) {
+                        depthArray.add(detail.getVal());
+                    } else if ("F".equals(detail.getDetailType())) {
+                        freqArray.add(detail.getVal());
+                    }
+                }
+
+                perf.setDepthArray(depthArray);
+                perf.setFreqArray(freqArray);
+            }
+
+            System.out.println("Performances with arrays: " + performances);
             System.out.println("Performances: " + performances);
 
         } catch (Exception e) {

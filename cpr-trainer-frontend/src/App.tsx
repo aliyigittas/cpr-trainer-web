@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router'
+import { Route, Routes, useLocation } from 'react-router'
 import LoginPage from './Login'
 import RegisterPage from './Register';
 import CPRPerformanceDashboard from './PerformanceHistory';
@@ -6,6 +6,10 @@ import CPRPerformanceDetailPopup from './PerformanceDetails';
 
 function App() {
 
+  const location = useLocation();
+  
+  // This helps in layering routes
+  const background = location.state && location.state.background;
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} /> {/* TODO: Simple explaination of project */}
@@ -27,11 +31,13 @@ function App() {
         totalCompression: 0,
         score: 0,
         trainingTime: 0,
-        performanceDate: ''
+        performanceDate: '',
+        depthArray: [],
+        freqArray: []
       }} onClose={function (): void {
         throw new Error('Function not implemented.');
-      } } />} />
-
+      } } depthData={[]} freqData={[]} />} />
+    
     </Routes>
   );
 }

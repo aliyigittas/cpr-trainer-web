@@ -1,5 +1,7 @@
 package com.lpsoft.cpr_trainer_backend;
 
+import java.util.List;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +42,10 @@ public class Performance {
     private String performanceDate;
 
     private double score;
+
+    private List<Double> DepthArray;
+
+    private List<Double> FreqArray;
  
     // Constructor
 
@@ -53,7 +59,7 @@ public class Performance {
 
                        int lowDepthCount, int lowFreqCount, int totalCompression,
 
-                       double trainingTime, String performanceDate, double score) {
+                       double trainingTime, String performanceDate, double score, List<Double> DepthArray, List<Double> FreqArray) {
 
         this.id = id;
 
@@ -85,6 +91,9 @@ public class Performance {
 
         this.score = score;
 
+        this.DepthArray = DepthArray;
+        
+        this.FreqArray = FreqArray;
     }
  
     // Getters and Setters
@@ -148,6 +157,14 @@ public class Performance {
     public double getScore() { return score; }
 
     public void setScore(double score) { this.score = score; }
+
+    public List<Double> getDepthArray() {return DepthArray;  }
+
+    public void setDepthArray(List<Double> DepthArray) {this.DepthArray = DepthArray;}
+
+    public List<Double> getFreqArray() {return FreqArray;  }
+
+    public void setFreqArray(List<Double> FreqArray) {this.FreqArray = FreqArray;}
 }
 
  

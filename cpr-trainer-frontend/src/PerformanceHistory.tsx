@@ -91,11 +91,35 @@ function CPRPerformanceDashboard() {
   const filterRef = useRef<HTMLDivElement | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPerformance, setSelectedPerformance] = useState<Performance | null>(null);
+  const [depthData, setDepthData] = useState<{ compression: number; depth: number }[]>([]);
+  const [freqData, setFreqData] = useState<{ compression: number; frequency: number }[]>([]);
 
   const handleViewDetails = (performance: Performance) => {
+    const newDepthData = performance.depthArray.map((depthValue, index) => ({
+      compression: index+1,
+      depth: Math.max(0, depthValue)
+    }));
+
+    const newFreqData = performance.freqArray.map((freqValue, index) => ({
+      compression: index+1,
+      frequency: Math.max(0, freqValue)
+    }));
+
     setSelectedPerformance(performance);
+    setDepthData(newDepthData);
+    setFreqData(newFreqData);
     setShowPopup(true);
   };
+
+  {showPopup && selectedPerformance && depthData.length > 0 && freqData.length > 0 && (
+    <CPRPerformanceDetailPopup 
+      performance={selectedPerformance} 
+      depthData={depthData}
+      freqData={freqData}
+      onClose={() => setShowPopup(false)}
+    />
+  )}
+  
 
   //get cookie token
   const navigate = useNavigate();
@@ -343,6 +367,8 @@ function CPRPerformanceDashboard() {
                   {showPopup && selectedPerformance && (
                     <CPRPerformanceDetailPopup
                       performance={selectedPerformance}
+                      depthData = {depthData}
+                      freqData = {freqData}
                       onClose={() => setShowPopup(false)}
                     />
                   )}

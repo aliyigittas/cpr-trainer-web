@@ -1,29 +1,101 @@
 import React, { useState } from 'react';
-import { X, Clock, Activity, ArrowDownCircle, ArrowUpCircle, Award, BarChart2, Heart } from 'lucide-react';
+import { X, Clock, Activity, ArrowDownCircle, ArrowUpCircle, Award, BarChart2, Heart, LineChart as LineChartIcon } from 'lucide-react';
 import Performance from './types/Performance'; // Import your existing Performance type
 import { JSX } from 'react/jsx-runtime';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
+import './CPRPerformanceDetailPopup.css';
+
 
 type FeedbackType = 'excellent' | 'good' | 'needs-improvement' | 'all';
 
 // Additional metrics not included in the Performance type
-interface DetailedMetrics {
+/*interface DetailedMetrics {
   fullReleasePercentage: number;
   detailedNotes: string;
-}
+  // Per-compression data
+  depthData: Array<{ compression: number; depth: number }>;
+  frequencyData: Array<{ compression: number; rate: number }>;
+}*/
 
-interface CPRPerformanceDetailPopup {
+interface CPRPerformanceDetailPopupProps {
   performance: Performance;
+  depthData: Array<{ compression: number; depth: number }>;
+  freqData: Array<{ compression: number; frequency: number }>;
   onClose: () => void;
 }
 
-function CPRPerformanceDetailPopup({ performance, onClose }: CPRPerformanceDetailPopup): JSX.Element {
-  const [activeTab, setActiveTab] = useState<'metrics' | 'notes'>('metrics');
-
+function CPRPerformanceDetailPopup({ performance, depthData, freqData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
+  const [activeTab, setActiveTab] = useState<'metrics' | 'notes' | 'statistics'>('metrics');
+  console.log("freq:"+freqData);
   // Mock data for metrics not in the original performance object
-  const detailedMetrics: DetailedMetrics = {
-    fullReleasePercentage: 92,
-    detailedNotes: "Overall performance shows good technique with consistent depth. Some improvements needed in maintaining proper rhythm throughout the session. Compression depth was occasionally too shallow in the middle of the session, possibly indicating fatigue. Hand positioning was excellent throughout the training."
-  };
+  // Generate sample time-series data for depth and frequency
+ // Generate sample per-compression data based on the performance metrics
+ /*const generateCompressionData = () => {
+  const depthData = [];
+  const frequencyData = [];
+  
+  // Use totalCompression count to generate data for each compression
+  for (let i = 1; i <= performance.totalCompression; i++) {
+    // Create variations in depth with occasional outliers
+    let depthValue = performance.meanDepth;
+    
+    // Add some randomness and patterns to simulate real data
+    if (i % 20 < 10) {
+      // Gradually decrease depth to simulate fatigue
+      depthValue -= (i % 10) * (performance.stdDepth / 5);
+    } else {
+      // Recovery period with improved depth
+      depthValue += (performance.stdDepth / 3);
+    }
+    
+    // Add random variation
+    depthValue += ((Math.random() * 2) - 1) * performance.stdDepth;
+    
+    // Add occasional outliers
+    if (i % 25 === 0) depthValue += performance.stdDepth * 2; // Too deep
+    if (i % 30 === 0) depthValue -= performance.stdDepth * 2; // Too shallow
+    
+    depthData.push({
+      compression: i,
+      depth: Math.max(0, depthValue)
+    });
+    
+    // Similar pattern for frequency/rate data
+    let rateValue = performance.meanFreq;
+    
+    // Add some pattern to the data
+    if (i % 15 < 7) {
+      // Gradually increase rate
+      rateValue += (i % 7) * (performance.stdFreq / 4);
+    } else {
+      // Gradual decrease
+      rateValue -= (performance.stdFreq / 2);
+    }
+    
+    // Add random variation
+    rateValue += ((Math.random() * 2) - 1) * performance.stdFreq;
+    
+    // Add occasional outliers
+    if (i % 22 === 0) rateValue += performance.stdFreq * 2; // Too fast
+    if (i % 28 === 0) rateValue -= performance.stdFreq * 2; // Too slow
+    
+    frequencyData.push({
+      compression: i,
+      rate: Math.max(0, rateValue)
+    });
+  }
+  
+  return { depthData, frequencyData };
+};
+
+const compressionData = generateCompressionData();
+
+const detailedMetrics: DetailedMetrics = {
+  fullReleasePercentage: 92,
+  detailedNotes: "Overall performance shows good technique with consistent depth. Some improvements needed in maintaining proper rhythm throughout the session. Compression depth was occasionally too shallow in the middle of the session, possibly indicating fatigue. Hand positioning was excellent throughout the training.",
+  depthData: compressionData.depthData,
+  frequencyData: compressionData.frequencyData
+};*/
 
   // Helper function to determine the color of feedback badge
   const getFeedbackColor = (type: string): string => {
@@ -56,8 +128,8 @@ function CPRPerformanceDetailPopup({ performance, onClose }: CPRPerformanceDetai
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl mx-4 overflow-hidden transition-all transform">
+    <div className="popup-overlay">
+     <div className="popup-content">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">CPR Performance Details</h2>
@@ -103,6 +175,16 @@ function CPRPerformanceDetailPopup({ performance, onClose }: CPRPerformanceDetai
             onClick={() => setActiveTab('metrics')}
           >
             Performance Metrics
+          </button>
+          <button
+            className={`flex-1 py-4 px-4 text-center text-sm font-medium ${
+              activeTab === 'statistics'
+                ? 'text-blue-600 border-b-2 border-blue-500 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+            onClick={() => setActiveTab('statistics')}
+          >
+            Statistics
           </button>
           <button
             className={`flex-1 py-4 px-4 text-center text-sm font-medium ${
@@ -224,12 +306,230 @@ function CPRPerformanceDetailPopup({ performance, onClose }: CPRPerformanceDetai
                 </div>
               </div>
             </div>
+          ) : activeTab === 'statistics' ? (
+            <div className="space-y-6">
+              <div className="flex items-center mb-2">
+                <LineChartIcon className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Performance Trends</h3>
+              </div>
+              
+              
+              {/* Depth Chart - Per Compression */}
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Compression Depth by Compression</h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={depthData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                      <XAxis 
+                        dataKey="compression" 
+                        stroke="#9CA3AF" 
+                        label={{ value: 'Compression Number', position: 'insideBottom', offset: -5 }} 
+                      />
+                      <YAxis 
+                        stroke="#9CA3AF" 
+                        label={{ value: 'Depth (mm)', angle: -90, position: 'insideLeft', offset: 10 }} 
+                        domain={['auto', 'auto']} 
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
+                        formatter={(value, name) => [`${value} mm`, 'Depth']}
+                        labelFormatter={(label) => `Compression #${label}`}
+                      />
+                      <Legend verticalAlign="top" height={36} />
+                      
+                      {/* Target depth zone */}
+                      <ReferenceLine 
+                        y={performance.meanDepth + performance.stdDepth} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Upper Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={performance.meanDepth - performance.stdDepth} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Lower Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={performance.meanDepth} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="5 5" 
+                        label={{ 
+                          value: 'Mean', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      
+                      <Line 
+                        type="monotone" 
+                        dataKey="depth" 
+                        name="Depth" 
+                        stroke="#3B82F6" 
+                        strokeWidth={2} 
+                        dot={false} 
+                        activeDot={{ r: 6, stroke: '#2563EB', strokeWidth: 2, fill: '#93C5FD' }} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-4 flex flex-wrap justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
+                    <span>Compression Depth</span>
+                  </div>
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-1 bg-gray-400 rounded-full mr-1"></span>
+                    <span>Target Range ({(performance.meanDepth - performance.stdDepth).toFixed(1)}-{(performance.meanDepth + performance.stdDepth).toFixed(1)} mm)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="inline-block w-3 h-1 bg-gray-400 stroke-dasharray-2 mr-1"></span>
+                    <span>Mean Depth ({performance.meanDepth.toFixed(1)} mm)</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Frequency Chart - Per Compression */}
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Compression Rate by Compression</h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={freqData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                      <XAxis 
+                        dataKey="compression" 
+                        stroke="#9CA3AF" 
+                        label={{ value: 'Compression Number', position: 'insideBottom', offset: -5 }} 
+                      />
+                      <YAxis 
+                        stroke="#9CA3AF" 
+                        label={{ value: 'Rate (bpm)', angle: -90, position: 'insideLeft', offset: 10 }} 
+                        domain={['auto', 'auto']} 
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
+                        formatter={(value, name) => [`${value} bpm`, 'Rate']}
+                        labelFormatter={(label) => `Compression #${label}`}
+                      />
+                      <Legend verticalAlign="top" height={36} />
+                      
+                      {/* Target rate zone */}
+                      <ReferenceLine 
+                        y={performance.meanFreq + performance.stdFreq} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Upper Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={performance.meanFreq - performance.stdFreq} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Lower Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={performance.meanFreq} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="5 5" 
+                        label={{ 
+                          value: 'Mean', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      
+                      <Line 
+                        type="monotone" 
+                        dataKey="frequency" 
+                        name="Rate" 
+                        stroke="#10B981" 
+                        strokeWidth={2} 
+                        dot={false} 
+                        activeDot={{ r: 6, stroke: '#059669', strokeWidth: 2, fill: '#6EE7B7' }} 
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-4 flex flex-wrap justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-3 bg-green-500 rounded-full mr-1"></span>
+                    <span>Actual Rate</span>
+                  </div>
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-1 bg-gray-400 rounded-full mr-1"></span>
+                    <span>Ideal Range (±{performance.stdFreq.toFixed(1)} bpm)</span>
+                  </div>
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
+                    <span>Too Fast ({(performance.meanFreq + performance.stdFreq * 2).toFixed(1)} bpm)</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1"></span>
+                    <span>Too Slow ({(performance.meanFreq - performance.stdFreq).toFixed(1)} bpm)</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Performance Summary */}
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Performance Summary</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Time in Target Depth Range</span>
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {Math.round(100 - ((performance.highDepthCount + performance.lowDepthCount) / performance.totalCompression * 100))}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-blue-500 h-2 rounded-full" 
+                        style={{ width: `${Math.round(100 - ((performance.highDepthCount + performance.lowDepthCount) / performance.totalCompression * 100))}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Time in Target Rate Range</span>
+                      <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {Math.round(100 - ((performance.highFreqCount + performance.lowFreqCount) / performance.totalCompression * 100))}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full" 
+                        style={{ width: `${Math.round(100 - ((performance.highFreqCount + performance.lowFreqCount) / performance.totalCompression * 100))}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">Instructor Notes</h3>
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {detailedMetrics.detailedNotes}
+                  {"fdjvn"}
                 </p>
               </div>
               

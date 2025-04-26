@@ -76,6 +76,12 @@ public class CprTrainerBackendApplication {
             //insert to users table
             if (databaseAdapter.savePerformance(performanceData)) {
                 System.out.println("✅ Performance başarıyla eklendi!");
+                if(databaseAdapter.saveDepthArray(performanceData.getDepthArray(), performanceData.getUid())){
+                    System.out.println("✅ Performance depth details başarıyla eklendi!");
+                    if(databaseAdapter.saveFreqArray(performanceData.getFreqArray(), performanceData.getUid())){
+                        System.out.println("✅ Performance freq details başarıyla eklendi!");
+                    }
+                }
                 createDump();
             } else {
                 System.err.println("❌ Performance eklenirken hata oluştu!");
