@@ -5,7 +5,6 @@ import { JSX } from 'react/jsx-runtime';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
 import './CPRPerformanceDetailPopup.css';
 
-
 type FeedbackType = 'excellent' | 'good' | 'needs-improvement' | 'all';
 
 // Additional metrics not included in the Performance type
@@ -120,13 +119,20 @@ const detailedMetrics: DetailedMetrics = {
     });
   };
 
-  // Format training time from seconds to MM:SS format
   const formatTrainingTime = (seconds: number): string => {
     const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
+    const remainingSeconds = Math.round(seconds % 60);
+    if (remainingSeconds === 60) {
+      return `${minutes + 1}:00`;
+    }
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+  
 
+  const IDEAL_MIN_FREQ = 100;
+  const IDEAL_MAX_FREQ = 120;
+  const IDEAL_MIN_DEPTH = 50;
+  const IDEAL_MAX_DEPTH = 60;
   return (
     <div className="popup-overlay">
      <div className="popup-content">
@@ -157,9 +163,13 @@ const detailedMetrics: DetailedMetrics = {
           
           <div>
             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getFeedbackColor(performance.feedbackType)}`}>
-              {performance.feedbackType === 'needs-improvement' 
-                ? 'Needs Improvement' 
-                : performance.feedbackType.charAt(0).toUpperCase() + performance.feedbackType.slice(1)}
+              {performance.feedbackType === 'A' ? 'Audio' 
+                : (performance.feedbackType === 'H' ? 'Haptic'
+                : (performance.feedbackType === 'V' ? 'Visual' 
+                : (performance.feedbackType === 'AH' ? 'Audio-Haptic'
+                : (performance.feedbackType === 'VA' ? 'Visual-Audio'
+                : (performance.feedbackType === 'VH' ? 'Visual-Haptic'
+                : (performance.feedbackType === 'VAH' ? 'Visual-Audio-Haptic' : ""))))))}
             </span>
           </div>
         </div>
@@ -340,7 +350,7 @@ const detailedMetrics: DetailedMetrics = {
                       
                       {/* Target depth zone */}
                       <ReferenceLine 
-                        y={performance.meanDepth + performance.stdDepth} 
+                        y={IDEAL_MAX_DEPTH} 
                         stroke="#9CA3AF" 
                         strokeDasharray="3 3" 
                         label={{ 
@@ -350,7 +360,7 @@ const detailedMetrics: DetailedMetrics = {
                         }} 
                       />
                       <ReferenceLine 
-                        y={performance.meanDepth - performance.stdDepth} 
+                        y={IDEAL_MIN_DEPTH} 
                         stroke="#9CA3AF" 
                         strokeDasharray="3 3" 
                         label={{ 
@@ -359,17 +369,6 @@ const detailedMetrics: DetailedMetrics = {
                           style: { fill: '#9CA3AF', fontSize: 10 } 
                         }} 
                       />
-                      <ReferenceLine 
-                        y={performance.meanDepth} 
-                        stroke="#9CA3AF" 
-                        strokeDasharray="5 5" 
-                        label={{ 
-                          value: 'Mean', 
-                          position: 'right', 
-                          style: { fill: '#9CA3AF', fontSize: 10 } 
-                        }} 
-                      />
-                      
                       <Line 
                         type="monotone" 
                         dataKey="depth" 
@@ -390,7 +389,7 @@ const detailedMetrics: DetailedMetrics = {
                   </div>
                   <div className="flex items-center mr-4">
                     <span className="inline-block w-3 h-1 bg-gray-400 rounded-full mr-1"></span>
-                    <span>Target Range ({(performance.meanDepth - performance.stdDepth).toFixed(1)}-{(performance.meanDepth + performance.stdDepth).toFixed(1)} mm)</span>
+                    <span>Target Range {(IDEAL_MIN_DEPTH)}-{(IDEAL_MAX_DEPTH)} mm</span>
                   </div>
                   <div className="flex items-center">
                     <span className="inline-block w-3 h-1 bg-gray-400 stroke-dasharray-2 mr-1"></span>
@@ -425,7 +424,7 @@ const detailedMetrics: DetailedMetrics = {
                       
                       {/* Target rate zone */}
                       <ReferenceLine 
-                        y={performance.meanFreq + performance.stdFreq} 
+                        y={IDEAL_MAX_FREQ} 
                         stroke="#9CA3AF" 
                         strokeDasharray="3 3" 
                         label={{ 
@@ -435,7 +434,7 @@ const detailedMetrics: DetailedMetrics = {
                         }} 
                       />
                       <ReferenceLine 
-                        y={performance.meanFreq - performance.stdFreq} 
+                        y={IDEAL_MIN_FREQ} 
                         stroke="#9CA3AF" 
                         strokeDasharray="3 3" 
                         label={{ 
@@ -444,17 +443,6 @@ const detailedMetrics: DetailedMetrics = {
                           style: { fill: '#9CA3AF', fontSize: 10 } 
                         }} 
                       />
-                      <ReferenceLine 
-                        y={performance.meanFreq} 
-                        stroke="#9CA3AF" 
-                        strokeDasharray="5 5" 
-                        label={{ 
-                          value: 'Mean', 
-                          position: 'right', 
-                          style: { fill: '#9CA3AF', fontSize: 10 } 
-                        }} 
-                      />
-                      
                       <Line 
                         type="monotone" 
                         dataKey="frequency" 
@@ -475,15 +463,11 @@ const detailedMetrics: DetailedMetrics = {
                   </div>
                   <div className="flex items-center mr-4">
                     <span className="inline-block w-3 h-1 bg-gray-400 rounded-full mr-1"></span>
-                    <span>Ideal Range (±{performance.stdFreq.toFixed(1)} bpm)</span>
-                  </div>
-                  <div className="flex items-center mr-4">
-                    <span className="inline-block w-3 h-3 bg-red-500 rounded-full mr-1"></span>
-                    <span>Too Fast ({(performance.meanFreq + performance.stdFreq * 2).toFixed(1)} bpm)</span>
+                    <span>Ideal Range {IDEAL_MIN_FREQ} - {IDEAL_MAX_FREQ} bpm</span>
                   </div>
                   <div className="flex items-center">
-                    <span className="inline-block w-3 h-3 bg-yellow-500 rounded-full mr-1"></span>
-                    <span>Too Slow ({(performance.meanFreq - performance.stdFreq).toFixed(1)} bpm)</span>
+                    <span className="inline-block w-3 h-1 bg-gray-400 stroke-dasharray-2 mr-1"></span>
+                    <span>Mean Depth ({performance.meanFreq.toFixed(1)} bpm)</span>
                   </div>
                 </div>
               </div>
@@ -494,7 +478,7 @@ const detailedMetrics: DetailedMetrics = {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex flex-col">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Time in Target Depth Range</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Compression in Target Depth Range</span>
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">
                         {Math.round(100 - ((performance.highDepthCount + performance.lowDepthCount) / performance.totalCompression * 100))}%
                       </span>
@@ -509,7 +493,7 @@ const detailedMetrics: DetailedMetrics = {
                   
                   <div className="flex flex-col">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Time in Target Rate Range</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Compression in Target Rate Range</span>
                       <span className="text-lg font-semibold text-gray-900 dark:text-white">
                         {Math.round(100 - ((performance.highFreqCount + performance.lowFreqCount) / performance.totalCompression * 100))}%
                       </span>
