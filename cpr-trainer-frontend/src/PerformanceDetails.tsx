@@ -157,7 +157,7 @@ const detailedMetrics: DetailedMetrics = {
           <div className="flex items-center">
             <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Duration: {formatTrainingTime(performance.trainingTime)}
+              Duration: {formatTrainingTime(performance.trainingTime)} min
             </span>
           </div>
           

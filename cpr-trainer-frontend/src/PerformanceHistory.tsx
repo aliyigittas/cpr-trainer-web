@@ -111,6 +111,15 @@ function CPRPerformanceDashboard() {
     setShowPopup(true);
   };
 
+  const formatTrainingTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.round(seconds % 60);
+    if (remainingSeconds === 60) {
+      return `${minutes + 1}:00`;
+    }
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   {showPopup && selectedPerformance && depthData.length > 0 && freqData.length > 0 && (
     <CPRPerformanceDetailPopup 
       performance={selectedPerformance} 
@@ -344,7 +353,7 @@ function CPRPerformanceDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="flex flex-col">
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Duration</span>
-                    <span className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{performance.trainingTime}</span>
+                    <span className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{formatTrainingTime(performance.trainingTime)} min</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Compression Rate</span>
