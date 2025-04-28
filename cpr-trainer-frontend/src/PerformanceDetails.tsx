@@ -114,7 +114,16 @@ const detailedMetrics: DetailedMetrics = {
       if (performanceNotesResponse.ok) {
         const performanceNotesData = await performanceNotesResponse.json();
         console.log("Performance notes data retrieved:", performanceNotesData);
-        setPerformanceNotes(performanceNotesData);
+        // `note` stringini JSON.parse ile bir dizi haline getiriyoruz
+      // Eğer array geliyorsa ilk elemanın note'una erişiyoruz
+      const noteString = Array.isArray(performanceNotesData) 
+        ? performanceNotesData[0]?.note 
+        : performanceNotesData.note;
+
+      // Note varsa parse et
+      const parsedNotes: PerformanceNote[] = noteString ? JSON.parse(noteString) : [];
+
+      console.log("Parsed notes:", parsedNotes);
       }
     }
     getPerformanceNote();
