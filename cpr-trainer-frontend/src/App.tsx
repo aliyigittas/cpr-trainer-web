@@ -3,6 +3,7 @@ import LoginPage from './Login'
 import RegisterPage from './Register';
 import CPRPerformanceDashboard from './PerformanceHistory';
 import CPRPerformanceDetailPopup from './PerformanceDetails';
+import ProfilePage from './Profile';
 
 function App() {
 
@@ -37,7 +38,7 @@ function App() {
       }} onClose={function (): void {
         throw new Error('Function not implemented.');
       } } depthData={[]} freqData={[]} />} />
-    
+      <Route path="/profile" element = {<ProfilePage/>}/>
     </Routes>
   );
 }

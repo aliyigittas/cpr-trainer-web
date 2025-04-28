@@ -115,7 +115,7 @@ function CPRPerformanceDashboard() {
     getUserInfo();
   }, []);
 
-  // Fetch performance data
+  // Fetch performance data 
   useEffect(() => {
     async function fetchPerformances() {
       const token = document.cookie.split('; ').find(row => row.startsWith('token='));
@@ -197,7 +197,7 @@ function CPRPerformanceDashboard() {
               <div className="ml-4 flex items-center">
                 {/* Profile dropdown */}
                 <div className="relative">
-                  <button className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                  <button className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" onClick={() => navigate('/profile')}>
                     <span className="sr-only">View profile</span>
                     <User className="h-6 w-6" />
                   </button>
