@@ -6,103 +6,39 @@ import Performance from './types/Performance';
 import { useNavigate } from 'react-router';
 import CPRPerformanceDetailPopup from './PerformanceDetails';
 
-// Theme Context
-
 // TypeScript interfaces
-
-type FeedbackType = 'all' | 'excellent' | 'good' | 'needs-improvement';
-
-
-// interface BadgeConfig {
-//   color: string;
-//   icon: React.ReactNode;
-// }
-
-// Sample CPR performance data
-// const initialPerformances: Performance[] = [
-//   {
-//     id: 1,
-//     date: '2025-04-20',
-//     time: '10:30 AM',
-//     duration: '5m 42s',
-//     compressionRate: '110/min',
-//     compressionDepth: '2.2 inches',
-//     feedback: 'excellent',
-//     notes: 'Perfect rhythm maintenance throughout the session. Excellent depth consistency.'
-//   },
-//   {
-//     id: 2,
-//     date: '2025-04-15',
-//     time: '2:15 PM',
-//     duration: '4m 30s',
-//     compressionRate: '95/min',
-//     compressionDepth: '1.9 inches',
-//     feedback: 'good',
-//     notes: 'Good overall performance. Try to maintain slightly deeper compressions.'
-//   },
-//   {
-//     id: 3,
-//     date: '2025-04-10',
-//     time: '11:45 AM',
-//     duration: '6m 12s',
-//     compressionRate: '120/min',
-//     compressionDepth: '1.7 inches',
-//     feedback: 'needs-improvement',
-//     notes: 'Compression rate slightly too fast. Depth needs to be increased for effective CPR.'
-//   },
-//   {
-//     id: 4,
-//     date: '2025-04-05',
-//     time: '9:00 AM',
-//     duration: '5m 20s',
-//     compressionRate: '105/min',
-//     compressionDepth: '2.1 inches',
-//     feedback: 'excellent',
-//     notes: 'Excellent technique and endurance. Perfect example of high-quality CPR.'
-//   }
-// ];
-
-// Feedback badge component
-// const FeedbackBadge: React.FC<FeedbackBadgeProps> = ({ type }) => {
-//   const badges: Record<Performance['feedback'], BadgeConfig> = {
-//     excellent: { color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100', icon: <ThumbsUp size={16} className="mr-1" /> },
-//     good: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100', icon: <ThumbsUp size={16} className="mr-1" /> },
-//     'needs-improvement': { color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-100', icon: <AlertTriangle size={16} className="mr-1" /> }
-//   };
-
-//   const { color, icon } = badges[type];
-  
-//   return (
-//     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
-//       {icon}
-//       {type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-//     </span>
-//   );
-// };
-
-
+type FeedbackType = 'A' | 'H' | 'V';
 
 // Main component
 function CPRPerformanceDashboard() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [filterFeedback, setFilterFeedback] = useState<FeedbackType>('all');
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-  const filterRef = useRef<HTMLDivElement | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedPerformance, setSelectedPerformance] = useState<Performance | null>(null);
   const [depthData, setDepthData] = useState<{ compression: number; depth: number }[]>([]);
   const [freqData, setFreqData] = useState<{ compression: number; frequency: number }[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
+  const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+   // Select all feedback types
+   const selectAllTypes = (): void => {
+    setSelectedTypes(['A', 'H', 'V']);
+  };
+  
+  const navigate = useNavigate();
 
+  // Handle viewing performance details
   const handleViewDetails = (performance: Performance) => {
-    const newDepthData = performance.depthArray.map((depthValue, index) => ({
-      compression: index+1,
-      depth: Math.max(0, depthValue)
-    }));
+    const minLength = Math.min(performance.depthArray.length, performance.freqArray.length);
 
-    const newFreqData = performance.freqArray.map((freqValue, index) => ({
-      compression: index+1,
-      frequency: Math.max(0, freqValue)
+    const newDepthData = performance.depthArray.slice(0, minLength).map((depthValue, index) => ({
+      compression: index + 1,
+      depth: Math.max(0, depthValue),
+    }));
+  
+    const newFreqData = performance.freqArray.slice(0, minLength).map((freqValue, index) => ({
+      compression: index + 1,
+      frequency: Math.max(0, freqValue),
     }));
 
     setSelectedPerformance(performance);
@@ -120,66 +56,11 @@ function CPRPerformanceDashboard() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  {showPopup && selectedPerformance && depthData.length > 0 && freqData.length > 0 && (
-    <CPRPerformanceDetailPopup 
-      performance={selectedPerformance} 
-      depthData={depthData}
-      freqData={freqData}
-      onClose={() => setShowPopup(false)}
-    />
-  )}
+  // Toggle the filter dropdown
+  const toggleFilterDropdown = (): void => {
+    setIsFilterOpen(!isFilterOpen);
+  };
   
-
-  //get cookie token
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    async function getUserInfo(){
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
-      console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
-      //fetch user data User type with Authorization header
-      const response = await fetch('api/auth/me', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token ? token.split('=')[1] : ''}`
-        }
-      })
-
-      if (response.ok) {
-        const userData = await response.json();
-        console.log("User data retrieved:", userData);
-      } else {
-        console.error("Failed to fetch user data");
-      }
-    }
-    getUserInfo();
-  }, []);
-
-  useEffect(() => {
-    async function fetchPerformances() {
-      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
-      console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
-      //fetch performance data with Authorization header
-      const response = await fetch('api/auth/getPerformance', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `${token ? token.split('=')[1] : ''}`
-        }
-      })
-      if (response.ok) {
-        const performanceData = await response.json();
-        console.log("Performance data retrieved:", performanceData);
-        setPerformances(performanceData);
-      } else {
-        console.error("Failed to fetch performance data");
-      }
-    }
-    fetchPerformances();
-  }, []);
-
-
   // Handle clicks outside to close the dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
@@ -193,6 +74,71 @@ function CPRPerformanceDashboard() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [filterRef]);
+  
+  // Toggle selection of a feedback type
+  const toggleFeedbackType = (type: FeedbackType): void => {
+    if (selectedTypes.includes(type)) {
+      setSelectedTypes(selectedTypes.filter(item => item !== type));
+    } else {
+      setSelectedTypes([...selectedTypes, type]);
+    }
+  };
+  
+  // Format the selected types for display
+  const getDisplayText = (): string => {
+    if (selectedTypes.length === 0) return 'All Types';
+    if (selectedTypes.length === 3) return 'All Types';
+    return selectedTypes.join('-');
+  };
+
+  // Fetch user info
+  useEffect(() => {
+    async function getUserInfo() {
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+      console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
+      
+      const response = await fetch('api/auth/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token ? token.split('=')[1] : ''}`
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        console.log("User data retrieved:", userData);
+      } else {
+        console.error("Failed to fetch user data");
+      }
+    }
+    getUserInfo();
+  }, []);
+
+  // Fetch performance data
+  useEffect(() => {
+    async function fetchPerformances() {
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+      console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
+      
+      const response = await fetch('api/auth/getPerformance', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token ? token.split('=')[1] : ''}`
+        }
+      });
+      
+      if (response.ok) {
+        const performanceData = await response.json();
+        console.log("Performance data retrieved:", performanceData);
+        setPerformances(performanceData);
+      } else {
+        console.error("Failed to fetch performance data");
+      }
+    }
+    fetchPerformances();
+  }, []);
   
   // Sort performances by date
   const handleSort = (): void => {
@@ -210,21 +156,13 @@ function CPRPerformanceDashboard() {
     setPerformances(sortedPerformances);
   };
   
-  // Toggle filter dropdown
-  const toggleFilterDropdown = (): void => {
-    setIsFilterOpen(!isFilterOpen);
-  };
-  
-  // Filter performances by feedback type
-  const handleFilter = (feedbackType: FeedbackType): void => {
-    setFilterFeedback(feedbackType);
-    setIsFilterOpen(false);
-  };
-  
-  // Apply filter
-  const filteredPerformances = filterFeedback === 'all' 
-    ? performances 
-    : performances.filter(perf => perf.feedbackType === filterFeedback);
+  // Filter performances based on selected feedback types
+  const filteredPerformances = selectedTypes.length === 0
+    ? performances
+    : performances.filter(perf => {
+        // Check if the performance's feedback type contains any of the selected types
+        return selectedTypes.some(type => perf.feedbackType.includes(type));
+      });
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -243,9 +181,8 @@ function CPRPerformanceDashboard() {
           <div className="flex justify-between h-16">
             <div className="flex items-center cursor-pointer">
               {/* Logo */}
-              
               <div className="flex-shrink-0 flex items-center">
-              <img src={cprLogo} alt="Logo" className="h-8 w-8 rounded-md" />
+                <img src={cprLogo} alt="Logo" className="h-8 w-8 rounded-md" />
                 <span className="ml-2 font-semibold text-gray-900 dark:text-white transition-colors">CPR Track</span>
               </div>
             </div>
@@ -296,36 +233,69 @@ function CPRPerformanceDashboard() {
                 className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
               >
                 <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                Filter: {filterFeedback === 'all' ? 'All Sessions' : filterFeedback.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                Filter: {getDisplayText()}
                 <ChevronDown className="ml-1 h-4 w-4" />
               </button>
               
               {isFilterOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
+                <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
+                  <div className="py-1">
+                    <div className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+                      Feedback Types
+                    </div>
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          checked={selectedTypes.length === 3}
+                          onChange={selectAllTypes}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="font-medium">All Types</span>
+                      </label>
+                    </div>
+                    
+                    <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          checked={selectedTypes.includes('A')}
+                          onChange={() => toggleFeedbackType('A')}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        Audio (A)
+                      </label>
+                    </div>
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          checked={selectedTypes.includes('H')}
+                          onChange={() => toggleFeedbackType('H')}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        Haptic (H)
+                      </label>
+                    </div>
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input 
+                          type="checkbox"
+                          checked={selectedTypes.includes('V')}
+                          onChange={() => toggleFeedbackType('V')}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        Visual (V)
+                      </label>
+                    </div>
+                  </div>
                   <div className="py-1">
                     <button 
-                      onClick={() => handleFilter('all')}
-                      className={`block w-full text-left px-4 py-2 text-sm ${filterFeedback === 'all' ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-200'} transition-colors cursor-pointer`}
+                      onClick={() => setSelectedTypes([])}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                     >
-                      All Sessions
-                    </button>
-                    <button 
-                      onClick={() => handleFilter('excellent')}
-                      className={`block w-full text-left px-4 py-2 text-sm ${filterFeedback === 'excellent' ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-200'} transition-colors cursor-pointer`}
-                    >
-                      Excellent
-                    </button>
-                    <button 
-                      onClick={() => handleFilter('good')}
-                      className={`block w-full text-left px-4 py-2 text-sm ${filterFeedback === 'good' ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-200'} transition-colors cursor-pointer`}
-                    >
-                      Good
-                    </button>
-                    <button 
-                      onClick={() => handleFilter('needs-improvement')}
-                      className={`block w-full text-left px-4 py-2 text-sm ${filterFeedback === 'needs-improvement' ? 'text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-900' : 'text-gray-700 dark:text-gray-200'} transition-colors cursor-pointer`}
-                    >
-                      Needs Improvement
+                      Clear filters
                     </button>
                   </div>
                 </div>
@@ -347,7 +317,24 @@ function CPRPerformanceDashboard() {
                     <Clock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <span className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">{performance.performanceDate}</span>
                   </div>
-                  {/* <FeedbackBadge type={performance.feedback} /> */}
+                  {/* Feedback Type Badge */}
+                  <div className="flex space-x-1">
+                    {performance.feedbackType.includes('A') && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">
+                        Audio
+                      </span>
+                    )}
+                    {performance.feedbackType.includes('H') && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100">
+                        Haptic
+                      </span>
+                    )}
+                    {performance.feedbackType.includes('V') && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">
+                        Visual
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -370,25 +357,30 @@ function CPRPerformanceDashboard() {
                 </div>
                 
                 <div className="mt-4 flex justify-end">
-                  <button className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"   onClick={() => handleViewDetails(performance)}
-
-                  >View Details</button>
-                  {showPopup && selectedPerformance && (
-                    <CPRPerformanceDetailPopup
-                      performance={selectedPerformance}
-                      depthData = {depthData}
-                      freqData = {freqData}
-                      onClose={() => setShowPopup(false)}
-                    />
-                  )}
+                  <button 
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                    onClick={() => handleViewDetails(performance)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Performance Detail Popup */}
+      {showPopup && selectedPerformance && (
+        <CPRPerformanceDetailPopup
+          performance={selectedPerformance}
+          depthData={depthData}
+          freqData={freqData}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
     </div>
   );
-};
+}
 
-export default CPRPerformanceDashboard
+export default CPRPerformanceDashboard;
