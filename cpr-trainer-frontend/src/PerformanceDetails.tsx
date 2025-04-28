@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Clock, Activity, ArrowDownCircle, ArrowUpCircle, Award, BarChart2, Heart, LineChart as LineChartIcon } from 'lucide-react';
 import Performance from './types/Performance'; // Import your existing Performance type
 import { JSX } from 'react/jsx-runtime';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, ReferenceArea } from 'recharts';
-import './CPRPerformanceDetailPopup.css';
 import PerformanceNote from './types/PerformanceNote';
 
 type FeedbackType = 'excellent' | 'good' | 'needs-improvement' | 'all';
@@ -170,14 +169,14 @@ const detailedMetrics: DetailedMetrics = {
   const IDEAL_MAX_DEPTH = 60;
 
   return (
-    <div className="popup-overlay">
-     <div className="popup-content">
+    <div className="fixed inset-0 bg-black/40 bg-opacity-30 flex justify-center items-start pt-24 z-50 overflow-y-auto">
+     <div className="bg-white p-5 rounded-lg w-[1000px] max-h-[calc(100vh-200px)] overflow-y-auto shadow-lg dark:bg-gray-800">
         {/* Header */}
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">CPR Performance Details</h2>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none cursor-pointer"
           >
             <X className="h-6 w-6" />
           </button>
@@ -213,7 +212,7 @@ const detailedMetrics: DetailedMetrics = {
         {/* Tab navigation */}
         <div className="flex border-b border-gray-200 dark:border-gray-700">
           <button
-            className={`flex-1 py-4 px-4 text-center text-sm font-medium ${
+            className={`flex-1 py-4 px-4 text-center text-sm font-medium cursor-pointer ${
               activeTab === 'metrics'
                 ? 'text-blue-600 border-b-2 border-blue-500 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -223,7 +222,7 @@ const detailedMetrics: DetailedMetrics = {
             Performance Metrics
           </button>
           <button
-            className={`flex-1 py-4 px-4 text-center text-sm font-medium ${
+            className={`flex-1 py-4 px-4 text-center text-sm font-medium cursor-pointer ${
               activeTab === 'statistics'
                 ? 'text-blue-600 border-b-2 border-blue-500 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -233,7 +232,7 @@ const detailedMetrics: DetailedMetrics = {
             Statistics
           </button>
           <button
-            className={`flex-1 py-4 px-4 text-center text-sm font-medium ${
+            className={`flex-1 py-4 px-4 text-center text-sm font-medium cursor-pointer ${
               activeTab === 'notes'
                 ? 'text-blue-600 border-b-2 border-blue-500 dark:text-blue-400'
                 : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -590,7 +589,7 @@ const detailedMetrics: DetailedMetrics = {
         <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all cursor-pointer"
           >
             Close
           </button>

@@ -236,7 +236,7 @@ function CPRPerformanceDashboard() {
               >
                 <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 Filter: {getDisplayText()}
-                <ChevronDown className="ml-1 h-4 w-4" />
+                <ChevronDown className={`ml-1 h-4 w-4 transform ${isFilterOpen ? 'rotate-180' : ''}`} />
               </button>
               
               {isFilterOpen && (
@@ -360,7 +360,7 @@ function CPRPerformanceDashboard() {
                 
                 <div className="mt-4 flex justify-end">
                   <button 
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                     onClick={() => handleViewDetails(performance)}
                   >
                     View Details

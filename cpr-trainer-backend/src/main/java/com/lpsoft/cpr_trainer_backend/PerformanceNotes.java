@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 
 @Entity
 @Table(name = "performancenotes")
@@ -14,6 +15,8 @@ public class PerformanceNotes {
     private int id;
     private int performanceid;
     private String notetype;
+
+    @Column(columnDefinition = "TEXT")
     private String note;
 
     // Constructors
