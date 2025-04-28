@@ -13,11 +13,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceDetailsRepository;
+import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceNotesRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
+
 
 
 @RestController
@@ -33,6 +36,9 @@ public class AuthController {
 
     @Autowired
     private PerformanceDetailsRepository performanceDetailsRepository;
+
+    @Autowired
+    private PerformanceNotesRepository performanceNotesRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -113,7 +119,7 @@ public class AuthController {
                 System.out.println("No performances found for user ID: " + uid);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(performances);
             }
-            // ⭐ New part: Fetch depth and frequency arrays
+            // New part: Fetch depth and frequency arrays
             for (Performance perf : performances) {
                 List<PerformanceDetails> details = performanceDetailsRepository.findByPerformanceId(perf.getId());
                 
@@ -139,6 +145,15 @@ public class AuthController {
             System.err.println("Error occurred while fetching performances: " + e.getMessage());
         }
         return ResponseEntity.ok(performances);
+    }
+    
+
+    @GetMapping("/getPerformanceNotes")
+    public List<PerformanceNotes> getPerformanceNotes(@RequestHeader("Authorization") String authHeader, @RequestParam String param) {
+        System.out.println("Performance ID: " + param);
+        List<PerformanceNotes> notes = performanceNotesRepository.findByPerformanceid(Integer.parseInt(param));
+        //take only message and sentiment part in note, it is stored in json format, parse it and return
+        return notes;
     }
     
 }

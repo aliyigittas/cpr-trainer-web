@@ -18,6 +18,58 @@ USE `cpr`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `performancedetails`
+--
+
+DROP TABLE IF EXISTS `performancedetails`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `performancedetails` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `performanceId` int DEFAULT NULL,
+  `detailType` varchar(255) DEFAULT NULL,
+  `val` double DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `performancedetails`
+--
+
+LOCK TABLES `performancedetails` WRITE;
+/*!40000 ALTER TABLE `performancedetails` DISABLE KEYS */;
+INSERT INTO `performancedetails` VALUES (1,1,'D',50),(2,1,'F',150),(3,1,'D',55),(4,1,'F',130),(5,1,'D',45.2),(6,1,'D',46.5),(7,1,'D',44.7),(8,1,'D',47.3),(9,1,'D',48),(10,1,'D',46.8),(11,1,'D',45.9),(12,1,'F',112),(13,1,'F',112.5),(14,1,'F',115.2),(15,1,'F',113.7),(16,1,'F',114.1),(17,1,'F',111.8),(18,1,'F',113),(19,1,'D',47.3),(20,6,'D',50),(21,6,'D',55),(22,6,'D',45.2),(23,6,'D',46.5),(24,6,'D',44.7),(25,6,'D',47.3),(26,6,'D',48),(27,6,'D',46.8),(28,6,'D',45.9),(29,6,'D',47.3),(30,6,'F',150),(31,6,'F',130),(32,6,'F',112),(33,6,'F',112.5),(34,6,'F',115.2),(35,6,'F',113.7),(36,6,'F',114.1),(37,6,'F',111.8),(38,6,'F',113),(39,7,'D',50),(40,7,'D',55),(41,7,'D',45.2),(42,7,'D',46.5),(43,7,'D',44.7),(44,7,'D',47.3),(45,7,'D',48),(46,7,'D',46.8),(47,7,'D',45.9),(48,7,'D',47.3),(49,7,'F',150),(50,7,'F',130),(51,7,'F',112),(52,7,'F',112.5),(53,7,'F',115.2),(54,7,'F',113.7),(55,7,'F',114.1),(56,7,'F',111.8),(57,7,'F',113),(58,8,'D',50),(59,8,'D',55),(60,8,'D',45.2),(61,8,'D',46.5),(62,8,'D',44.7),(63,8,'D',47.3),(64,8,'D',48),(65,8,'D',46.8),(66,8,'D',45.9),(67,8,'D',47.3),(68,8,'F',150),(69,8,'F',130),(70,8,'F',112),(71,8,'F',112.5),(72,8,'F',115.2),(73,8,'F',113.7),(74,8,'F',114.1),(75,8,'F',111.8),(76,8,'F',113),(77,9,'D',50),(78,9,'D',55),(79,9,'D',45.2),(80,9,'D',46.5),(81,9,'D',44.7),(82,9,'D',47.3),(83,9,'D',48),(84,9,'D',46.8),(85,9,'D',45.9),(86,9,'D',47.3),(87,9,'F',150),(88,9,'F',130),(89,9,'F',112),(90,9,'F',112.5),(91,9,'F',115.2),(92,9,'F',113.7),(93,9,'F',114.1),(94,9,'F',111.8),(95,9,'F',113);
+/*!40000 ALTER TABLE `performancedetails` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `performancenotes`
+--
+
+DROP TABLE IF EXISTS `performancenotes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `performancenotes` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `performanceid` int DEFAULT NULL,
+  `notetype` varchar(255) DEFAULT NULL,
+  `note` text,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `performancenotes`
+--
+
+LOCK TABLES `performancenotes` WRITE;
+/*!40000 ALTER TABLE `performancenotes` DISABLE KEYS */;
+INSERT INTO `performancenotes` VALUES (3,9,'A','[\n    {\n        \"message\": \"The mean depth of compressions is above the recommended range, indicating a need for improvement in compression depth control.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The mean frequency of compressions is considerably higher than recommended, with high variability, showing a need for better frequency regulation.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The standard deviation in compression depth is high, indicating inconsistency in compression application.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"Overall performance score is low, suggesting an opportunity for targeted feedback and additional practice.\",\n        \"sentiment\": \"Negative\"\n    }\n]');
+/*!40000 ALTER TABLE `performancenotes` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `performances`
 --
 
@@ -26,22 +78,24 @@ DROP TABLE IF EXISTS `performances`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `performances` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `uid` int NOT NULL,
+  `uid` int DEFAULT NULL,
   `feedbackType` varchar(255) DEFAULT NULL,
-  `meanDepth` double DEFAULT '0',
-  `meanFreq` double DEFAULT '0',
-  `stdDepth` double DEFAULT '0',
-  `stdFreq` double DEFAULT '0',
-  `highDepthCount` int DEFAULT '0',
-  `highFreqCount` int DEFAULT '0',
-  `lowDepthCount` int DEFAULT '0',
-  `lowFreqCount` int DEFAULT '0',
-  `totalCompression` int DEFAULT '0',
-  `score` double DEFAULT '0',
-  `trainingTime` double DEFAULT '0',
+  `meanDepth` double DEFAULT NULL,
+  `meanFreq` double DEFAULT NULL,
+  `stdDepth` double DEFAULT NULL,
+  `stdFreq` double DEFAULT NULL,
+  `highDepthCount` int DEFAULT NULL,
+  `highFreqCount` int DEFAULT NULL,
+  `lowDepthCount` int DEFAULT NULL,
+  `lowFreqCount` int DEFAULT NULL,
+  `totalCompression` int DEFAULT NULL,
+  `score` double DEFAULT NULL,
+  `trainingTime` double DEFAULT NULL,
   `performanceDate` varchar(255) DEFAULT NULL,
+  `DepthArray` varbinary(255) DEFAULT NULL,
+  `FreqArray` varbinary(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,7 +104,7 @@ CREATE TABLE `performances` (
 
 LOCK TABLES `performances` WRITE;
 /*!40000 ALTER TABLE `performances` DISABLE KEYS */;
-INSERT INTO `performances` VALUES (1,9,'V',148.21,177.86,58.32,210.28,8,1,1,1,9,50,5.01,'2025-04-22 15:45:27');
+INSERT INTO `performances` VALUES (1,11,'V',148.21,177.86,58.32,210.28,0,1,7,1,9,50,120.01,'2025-04-22 15:45:27',NULL,NULL),(6,11,'VH',148.21,177.86,58.32,210.28,0,1,7,1,9,50,120.01,'2025-04-28 15:45:27',NULL,NULL),(7,11,'VH',148.21,177.86,58.32,210.28,0,1,7,1,9,50,120.01,'2025-04-28 15:45:27',NULL,NULL),(8,11,'VH',148.21,177.86,58.32,210.28,0,1,7,1,9,50,120.01,'2025-04-28 18:45:27',NULL,NULL),(9,11,'VH',148.21,177.86,58.32,210.28,0,1,7,1,9,50,120.01,'2025-04-28 18:45:27',NULL,NULL);
 /*!40000 ALTER TABLE `performances` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -68,9 +122,9 @@ CREATE TABLE `users` (
   `username` varchar(255) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `khasid` varchar(255) DEFAULT NULL,
+  `khasID` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,7 +133,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'Ali','Taş','ali','ali@ali.com','123456','20201701054'),(2,'local','test',NULL,'local@mail.com','1111','1234567890'),(3,'local','dump',NULL,'localdump@mail.com','123456','11111111111'),(4,'2231test','local',NULL,'local@son.com','12345','22222222'),(5,'2238docker','a',NULL,'aaa@aa.com','12345','11111'),(6,'2241local','a',NULL,'aaa@aa.com','12345','111111111'),(7,'John','Doe','johndoe','johndoe@example.com','$2a$10$Uq5aQE69ZRCQVMj3l60/YeV5dIMugbzXcKyVo5kP5EZaCPsPK.c26','12345'),(8,'John','Doe','john','johndoe@example.com','9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08','12345'),(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054');
+INSERT INTO `users` VALUES (9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054'),(10,'da','asd','sad','a@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213'),(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -92,4 +146,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-04-25 17:38:33
+-- Dump completed on 2025-04-28 18:48:15

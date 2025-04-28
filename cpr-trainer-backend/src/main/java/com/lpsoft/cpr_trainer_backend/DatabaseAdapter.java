@@ -58,6 +58,27 @@ public class DatabaseAdapter {
         }
     }
 
+    public Boolean savePerformanceNotes(String note, int uid, String noteType) {
+        int lastPerformanceId = getLastPerformanceByUid(uid);
+
+        try {
+            String sql = "INSERT INTO `cpr`.`performancenotes` (" +
+                         "performanceid, notetype, note" +
+                         ") VALUES (?, ?, ?)";
+    
+            jdbcTemplate.update(sql,
+                lastPerformanceId,
+                noteType,
+                note
+            );
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans notu eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+
     public int getUid(String email) {
         try {
             String sql = "SELECT id FROM `cpr`.`users` WHERE email = '"+ email + "'";
@@ -69,16 +90,16 @@ public class DatabaseAdapter {
         } 
     }
 
-    public Boolean saveDepthArray(List<Double> DepthArray, int uid){
+    public Boolean saveDepthArray(List<Double> DepthArray, int uid, String type){
         int lastPerformanceId = getLastPerformanceByUid(uid);
         try {
             for(int i=0; i<DepthArray.size(); i++){
                 
-                    String sql = "INSERT INTO `cpr`.`performanceDetails` (" +
+                    String sql = "INSERT INTO `cpr`.`performancedetails` (" +
                                 "performanceId, detailType, val" +
                                 ") VALUES (?, ?, ?)";
             
-                    jdbcTemplate.update(sql, lastPerformanceId,'D', DepthArray.get(i));                
+                    jdbcTemplate.update(sql, lastPerformanceId,type, DepthArray.get(i));                
             }
             return true;
         } catch (Exception e) {
@@ -87,16 +108,16 @@ public class DatabaseAdapter {
         }
     }
 
-    public Boolean saveFreqArray(List<Double> FreqArray, int uid){
+    public Boolean saveFreqArray(List<Double> FreqArray, int uid, String type){
         int lastPerformanceId = getLastPerformanceByUid(uid);
         try {
             for(int i=0; i<FreqArray.size(); i++){
                 
-                    String sql = "INSERT INTO `cpr`.`performanceDetails` (" +
+                    String sql = "INSERT INTO `cpr`.`performancedetails` (" +
                                 "performanceId, detailType, val" +
                                 ") VALUES (?, ?, ?)";
             
-                    jdbcTemplate.update(sql, lastPerformanceId,'F', FreqArray.get(i));                
+                    jdbcTemplate.update(sql, lastPerformanceId, type, FreqArray.get(i));                
             }
             return true;
         } catch (Exception e) {

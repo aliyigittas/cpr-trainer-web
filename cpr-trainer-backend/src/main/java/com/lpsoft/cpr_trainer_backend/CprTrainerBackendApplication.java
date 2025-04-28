@@ -9,14 +9,22 @@ import javax.sql.DataSource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @SpringBootApplication
 @RestController
@@ -72,15 +80,28 @@ public class CprTrainerBackendApplication {
             System.out.println("Received user data: " + performance);
             //parse user data from class it will come as json format
             Performance performanceData = new ObjectMapper().readValue(performance, Performance.class);
+            String openAiResponse = askOpenAi(performance); // Burada çağırdığın anda bekler!
+            System.out.println("OpenAI Response: " + openAiResponse);
 
             //insert to users table
             if (databaseAdapter.savePerformance(performanceData)) {
                 System.out.println("✅ Performance başarıyla eklendi!");
-                if(databaseAdapter.saveDepthArray(performanceData.getDepthArray(), performanceData.getUid())){
+                if(databaseAdapter.saveDepthArray(performanceData.getDepthArray(), performanceData.getUid(),"D")){
                     System.out.println("✅ Performance depth details başarıyla eklendi!");
-                    if(databaseAdapter.saveFreqArray(performanceData.getFreqArray(), performanceData.getUid())){
+                    if(databaseAdapter.saveFreqArray(performanceData.getFreqArray(), performanceData.getUid(),"F")){
                         System.out.println("✅ Performance freq details başarıyla eklendi!");
+                        if (databaseAdapter.savePerformanceNotes(openAiResponse, performanceData.getUid(), "A")){
+                            System.out.println("✅ Performance notes başarıyla eklendi!");
+                        } else {
+                            System.err.println("❌ Performance notes eklenirken hata oluştu!");
+                        }
                     }
+                    else {
+                        System.err.println("❌ Performance freq details eklenirken hata oluştu!");
+                    }
+                }
+                else {
+                    System.err.println("❌ Performance depth details eklenirken hata oluştu!");
                 }
                 createDump();
             } else {
@@ -92,6 +113,75 @@ public class CprTrainerBackendApplication {
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();
             return "Error processing performance data!";
+        }
+    }
+
+    //@PostMapping("/askOpenAi")
+    public String askOpenAi(@RequestBody String data) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RestTemplate restTemplate = new RestTemplate();
+        String apiKey = "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"; // Buraya kendi API Key'ini yaz
+
+
+        String finalPrompt = """
+            You are an expert CPR training performance reviewer.
+
+            You are given a dataset from a CPR training session. Analyze the provided performance metrics carefully.
+
+            Your task:
+            - Summarize the CPR performance into exactly 4-5 key points.
+            - Each point must be a JSON object with the following structure:
+            {
+                "message": "A short, clear and concise sentence summarizing a key insight.",
+                "sentiment": "Positive" or "Negative"
+            }
+            - Return a JSON array containing all the key points.
+            - Focus on depth quality, frequency control, consistency, and overall performance score.
+
+            Here is the data you must analyze: "\n"
+            """ + data + "\n";
+
+        try {
+            // JSON nesnesi oluştur
+            ObjectNode requestJson = objectMapper.createObjectNode();
+            requestJson.put("model", "gpt-4o");
+
+            ArrayNode messagesArray = objectMapper.createArrayNode();
+            ObjectNode userMessage = objectMapper.createObjectNode();
+            userMessage.put("role", "user");
+            userMessage.put("content", finalPrompt);
+            messagesArray.add(userMessage);
+
+            requestJson.set("messages", messagesArray);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(apiKey);
+
+            HttpEntity<String> request = new HttpEntity<>(
+                    objectMapper.writeValueAsString(requestJson),
+                    headers
+            );
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    "https://api.openai.com/v1/chat/completions",
+                    HttpMethod.POST,
+                    request,
+                    String.class
+            );
+
+            String openAiResponse = response.getBody();
+            // JSON yanıtını ayrıştır
+            ObjectNode responseJson = objectMapper.readValue(openAiResponse, ObjectNode.class);
+            String content = responseJson.get("choices").get(0).get("message").get("content").asText();
+
+            // Eğer başında ve sonunda ``` varsa onları temizle
+            content = content.replaceAll("^```json\\s*", "").replaceAll("\\s*```$", "").trim();
+            return content;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Hata oluştu: " + e.getMessage();
         }
     }
 

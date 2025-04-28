@@ -40,7 +40,7 @@ function CPRPerformanceDashboard() {
       compression: index + 1,
       frequency: Math.max(0, freqValue),
     }));
-
+    
     setSelectedPerformance(performance);
     setDepthData(newDepthData);
     setFreqData(newFreqData);
@@ -131,8 +131,10 @@ function CPRPerformanceDashboard() {
       
       if (response.ok) {
         const performanceData = await response.json();
-        console.log("Performance data retrieved:", performanceData);
         setPerformances(performanceData);
+        console.log("Performance data retrieved:", performanceData);
+        
+        
       } else {
         console.error("Failed to fetch performance data");
       }

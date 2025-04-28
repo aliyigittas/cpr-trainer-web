@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, Clock, Activity, ArrowDownCircle, ArrowUpCircle, Award, BarChart2, Heart, LineChart as LineChartIcon } from 'lucide-react';
 import Performance from './types/Performance'; // Import your existing Performance type
 import { JSX } from 'react/jsx-runtime';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, ReferenceArea } from 'recharts';
 import './CPRPerformanceDetailPopup.css';
+import PerformanceNote from './types/PerformanceNote';
 
 type FeedbackType = 'excellent' | 'good' | 'needs-improvement' | 'all';
 
@@ -25,6 +26,8 @@ interface CPRPerformanceDetailPopupProps {
 
 function CPRPerformanceDetailPopup({ performance, depthData, freqData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<'metrics' | 'notes' | 'statistics'>('metrics');
+  const [performanceNotes, setPerformanceNotes] = useState<PerformanceNote[]>([]);
+  
   console.log("freq:"+freqData);
   // Mock data for metrics not in the original performance object
   // Generate sample time-series data for depth and frequency
@@ -96,6 +99,30 @@ const detailedMetrics: DetailedMetrics = {
   frequencyData: compressionData.frequencyData
 };*/
 
+
+  useEffect(() => {
+    async function getPerformanceNote(){
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+      const performanceData = performance;
+      const performanceNotesResponse = await fetch(`api/auth/getPerformanceNotes?param=${performanceData.id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token ? token.split('=')[1] : ''}`
+        }
+      });
+      if (performanceNotesResponse.ok) {
+        const performanceNotesData = await performanceNotesResponse.json();
+        console.log("Performance notes data retrieved:", performanceNotesData);
+        setPerformanceNotes(performanceNotesData);
+      }
+    }
+    getPerformanceNote();
+  }, []);
+
+
+
+
   // Helper function to determine the color of feedback badge
   const getFeedbackColor = (type: string): string => {
     switch (type) {
@@ -133,6 +160,7 @@ const detailedMetrics: DetailedMetrics = {
   const IDEAL_MAX_FREQ = 120;
   const IDEAL_MIN_DEPTH = 50;
   const IDEAL_MAX_DEPTH = 60;
+
   return (
     <div className="popup-overlay">
      <div className="popup-content">
@@ -339,16 +367,21 @@ const detailedMetrics: DetailedMetrics = {
                       <YAxis 
                         stroke="#9CA3AF" 
                         label={{ value: 'Depth (mm)', angle: -90, position: 'insideLeft', offset: 10 }} 
-                        domain={['auto', 'auto']} 
+                        domain={[Math.min(IDEAL_MIN_DEPTH - 10, Math.min(...(performance.depthArray.length ? performance.depthArray : [IDEAL_MIN_DEPTH - 10]))), Math.max(IDEAL_MAX_DEPTH + 10, Math.max(...(performance.depthArray.length ? performance.depthArray : [IDEAL_MAX_DEPTH + 10])))]}
                       />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value, name) => [`${value} mm`, 'Depth']}
-                        labelFormatter={(label) => `Compression #${label}`}
+                        formatter={(value:string, name:string) => [`${value} mm`, 'Depth']}
+                        labelFormatter={(label:string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
-                      
-                      {/* Target depth zone */}
+                      <ReferenceArea
+                        y1={IDEAL_MIN_DEPTH} 
+                        y2={IDEAL_MAX_DEPTH} 
+                        strokeOpacity={0} 
+                        fill="green" 
+                        fillOpacity={0.2}
+                      />
                       <ReferenceLine 
                         y={IDEAL_MAX_DEPTH} 
                         stroke="#9CA3AF" 
@@ -369,6 +402,8 @@ const detailedMetrics: DetailedMetrics = {
                           style: { fill: '#9CA3AF', fontSize: 10 } 
                         }} 
                       />
+                      {/* Target depth zone */}
+                      
                       <Line 
                         type="monotone" 
                         dataKey="depth" 
@@ -413,16 +448,23 @@ const detailedMetrics: DetailedMetrics = {
                       <YAxis 
                         stroke="#9CA3AF" 
                         label={{ value: 'Rate (bpm)', angle: -90, position: 'insideLeft', offset: 10 }} 
-                        domain={['auto', 'auto']} 
+                        domain={[Math.min(IDEAL_MIN_FREQ - 10, Math.min(...(performance.freqArray.length ? performance.freqArray : [IDEAL_MIN_FREQ - 10]))), Math.max(IDEAL_MAX_FREQ + 10, Math.max(...(performance.freqArray.length ? performance.freqArray : [IDEAL_MAX_FREQ + 10])))]}
                       />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value, name) => [`${value} bpm`, 'Rate']}
-                        labelFormatter={(label) => `Compression #${label}`}
+                        formatter={(value:string, name:string) => [`${value} bpm`, 'Rate']}
+                        labelFormatter={(label:string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
                       
                       {/* Target rate zone */}
+                      <ReferenceArea 
+                        y1={IDEAL_MIN_FREQ} 
+                        y2={IDEAL_MAX_FREQ} 
+                        strokeOpacity={0} 
+                        fill="green" 
+                        fillOpacity={0.2}
+                      />
                       <ReferenceLine 
                         y={IDEAL_MAX_FREQ} 
                         stroke="#9CA3AF" 
@@ -520,6 +562,16 @@ const detailedMetrics: DetailedMetrics = {
               <div className="mt-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Key Takeaways</h3>
                 <ul className="space-y-2">
+                  {
+                    performanceNotes.map((message, sentiment) => (
+                      <li key={message.message} className="flex items-start">
+                        <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full ${getFeedbackColor(message.sentiment)} mr-2`}>
+                          {message.sentiment === 'positive' ? '✓' : (message.sentiment === 'negative' ? '!' : 'X')}
+                        </span>
+                        <span className="text-gray-700 dark:text-gray-300">{message.message}</span>
+                      </li>
+                    ))
+                  }
                   <li className="flex items-start">
                     <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 mr-2">✓</span>
                     <span className="text-gray-700 dark:text-gray-300">Excellent hand positioning throughout</span>
