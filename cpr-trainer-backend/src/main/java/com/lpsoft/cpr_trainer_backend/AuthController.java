@@ -3,6 +3,7 @@ package com.lpsoft.cpr_trainer_backend;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,6 @@ public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
-
     
     @Autowired
     private PerformanceRepository performanceRepository;
@@ -154,6 +154,42 @@ public class AuthController {
         List<PerformanceNotes> notes = performanceNotesRepository.findByPerformanceid(Integer.parseInt(param));
         //take only message and sentiment part in note, it is stored in json format, parse it and return
         return notes;
+    }
+    
+
+    @PostMapping("/addInstructorNote")
+    public ResponseEntity<String> addInstructorNote(@RequestHeader("Authorization") String authHeader, @RequestBody Map<String, String> body) {
+        
+        String performanceid = body.get("performanceid");
+        String note = body.get("note");
+
+        try {
+            ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+            if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
+                // Handle unauthorized access
+            }
+            User user = (User) userInfoResponse.getBody();
+            if (user == null) {
+                // Handle user not found
+            }
+            else {
+                // Kullanıcı bilgilerini al
+                System.out.println("User found: " + user.getUsername());
+                //TODO: check if the user is admin from above response and continue adding note
+                //saveInstructorNote(Integer.parseInt(performanceid), "Instructor", note);
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error occurred while fetching user info: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
+        }
+
+        System.out.println("Performance ID: " + performanceid);
+        System.out.println("Instructor Note: " + note);
+        //TODO: DBye ekle
+
+        
+        return ResponseEntity.ok("Instructor note added successfully.");
     }
     
 }

@@ -25,7 +25,9 @@ interface CPRPerformanceDetailPopupProps {
 
 function CPRPerformanceDetailPopup({ performance, depthData, freqData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<'metrics' | 'notes' | 'statistics'>('metrics');
-  const [performanceNotes, setPerformanceNotes] = useState<PerformanceNote[]>([]);
+  const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
+  const [humanNotes, setHumanNotes] = useState<string[]>([]);
+
   
   console.log("freq:"+freqData);
   // Mock data for metrics not in the original performance object
@@ -113,17 +115,27 @@ const detailedMetrics: DetailedMetrics = {
       if (performanceNotesResponse.ok) {
         const performanceNotesData = await performanceNotesResponse.json();
         console.log("Performance notes data retrieved:", performanceNotesData);
-        // `note` stringini JSON.parse ile bir dizi haline getiriyoruz
-      // Eğer array geliyorsa ilk elemanın note'una erişiyoruz
-      const noteString = Array.isArray(performanceNotesData) 
-        ? performanceNotesData[0]?.note 
-        : performanceNotesData.note;
+        const humanNotesArray: string[] = [];
+        const aiNotesArray: PerformanceNote[] = [];
 
-      // Note varsa parse et
-      const parsedNotes: PerformanceNote[] = noteString ? JSON.parse(noteString) : [];
-      setPerformanceNotes(parsedNotes);
+        performanceNotesData.forEach((noteObj: {
+          id: number;
+          performanceid: number;
+          notetype: string;
+          note: string;
+        }) => {
+          if (noteObj.notetype === 'H') {
+            humanNotesArray.push(noteObj.note);
+          } else if (noteObj.notetype === 'A') {
+            const parsedNotes: PerformanceNote[] = noteObj.note ? JSON.parse(noteObj.note) : [];
+            aiNotesArray.push(...parsedNotes);
+          }
+        });
 
-      console.log("Parsed notes:", parsedNotes);
+        console.log("AI notes:", aiNotesArray);
+        console.log("Human notes:", humanNotesArray);
+        setHumanNotes(humanNotesArray);
+        setAiNotes(aiNotesArray);
       }
     }
     getPerformanceNote();
@@ -562,7 +574,7 @@ const detailedMetrics: DetailedMetrics = {
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">Instructor Notes</h3>
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {"fdjvn"}
+                  {humanNotes.length > 0 ? humanNotes.join('\n') : 'No instructor notes available.'}
                 </p>
               </div>
               
@@ -570,9 +582,9 @@ const detailedMetrics: DetailedMetrics = {
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Key Takeaways</h3>
                 <ul className="space-y-2">
                   {
-                    performanceNotes.map((message, sentiment) => (
-                      <li key={message.message} className="flex items-start">
-                        <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full ${getFeedbackColor(message.sentiment)} mr-2`}>
+                    aiNotes.map((message, key) => (
+                      <li key={key} className="flex items-start" >
+                        <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full flex-shrink-0 ${getFeedbackColor(message.sentiment)} mr-2`}>
                           {message.sentiment === 'Positive' ? '✓' : (message.sentiment === 'Negative' ? '!' : 'X')}
                         </span>
                         <span className="text-gray-700 dark:text-gray-300">{message.message}</span>

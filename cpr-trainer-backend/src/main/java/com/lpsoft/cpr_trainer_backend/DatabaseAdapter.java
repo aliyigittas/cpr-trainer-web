@@ -135,6 +135,25 @@ public class DatabaseAdapter {
             return -1; // Hata durumunda -1 döndür
         }
     }
+
+    public Boolean saveInstructorNote(int performanceid, String noteType, String note) {
+        try {
+            String sql = "INSERT INTO `cpr`.`performancenotes` (" +
+                         "performanceid, notetype, note" +
+                         ") VALUES (?, ?, ?)";
+    
+            jdbcTemplate.update(sql,
+                performanceid,
+                noteType,
+                note
+            );
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans notu eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
     
 
 }
