@@ -122,6 +122,7 @@ const detailedMetrics: DetailedMetrics = {
 
       // Note varsa parse et
       const parsedNotes: PerformanceNote[] = noteString ? JSON.parse(noteString) : [];
+      setPerformanceNotes(parsedNotes);
 
       console.log("Parsed notes:", parsedNotes);
       }
@@ -135,11 +136,9 @@ const detailedMetrics: DetailedMetrics = {
   // Helper function to determine the color of feedback badge
   const getFeedbackColor = (type: string): string => {
     switch (type) {
-      case 'excellent':
+      case 'Positive':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'good':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'needs-improvement':
+      case 'Negative':
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
@@ -575,38 +574,12 @@ const detailedMetrics: DetailedMetrics = {
                     performanceNotes.map((message, sentiment) => (
                       <li key={message.message} className="flex items-start">
                         <span className={`inline-flex items-center justify-center h-6 w-6 rounded-full ${getFeedbackColor(message.sentiment)} mr-2`}>
-                          {message.sentiment === 'positive' ? '✓' : (message.sentiment === 'negative' ? '!' : 'X')}
+                          {message.sentiment === 'Positive' ? '✓' : (message.sentiment === 'Negative' ? '!' : 'X')}
                         </span>
                         <span className="text-gray-700 dark:text-gray-300">{message.message}</span>
                       </li>
                     ))
                   }
-                  <li className="flex items-start">
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 mr-2">✓</span>
-                    <span className="text-gray-700 dark:text-gray-300">Excellent hand positioning throughout</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 mr-2">✓</span>
-                    <span className="text-gray-700 dark:text-gray-300">Good overall compression rate consistency</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 mr-2">!</span>
-                    <span className="text-gray-700 dark:text-gray-300">Work on maintaining depth during extended sessions</span>
-                  </li>
-
-                  {performance.highDepthCount > 5 && (
-                    <li className="flex items-start">
-                      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 mr-2">!</span>
-                      <span className="text-gray-700 dark:text-gray-300">Avoid excessive compression depth ({performance.highDepthCount} instances)</span>
-                    </li>
-                  )}
-
-                  {performance.lowFreqCount > 5 && (
-                    <li className="flex items-start">
-                      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 mr-2">!</span>
-                      <span className="text-gray-700 dark:text-gray-300">Increase compression rate to meet guidelines ({performance.lowFreqCount} slow instances)</span>
-                    </li>
-                  )}
                 </ul>
               </div>
             </div>
