@@ -46,6 +46,8 @@ public class Performance {
     private List<Double> DepthArray;
 
     private List<Double> FreqArray;
+
+    private List<Double> positionArray;
  
     // Constructor
 
@@ -59,7 +61,7 @@ public class Performance {
 
                        int lowDepthCount, int lowFreqCount, int totalCompression,
 
-                       double trainingTime, String performanceDate, double score, List<Double> DepthArray, List<Double> FreqArray) {
+                       double trainingTime, String performanceDate, double score, List<Double> DepthArray, List<Double> FreqArray, List<Double> positionArray) {
 
         this.id = id;
 
@@ -94,6 +96,8 @@ public class Performance {
         this.DepthArray = DepthArray;
         
         this.FreqArray = FreqArray;
+
+        this.positionArray = positionArray;
     }
  
     // Getters and Setters
@@ -165,6 +169,10 @@ public class Performance {
     public List<Double> getFreqArray() {return FreqArray;  }
 
     public void setFreqArray(List<Double> FreqArray) {this.FreqArray = FreqArray;}
+
+    public List<Double> getPositionArray() {return positionArray;  }
+
+    public void setPositionArray(List<Double> positionArray) {this.positionArray = positionArray;}
 }
 
  

@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,11 +91,17 @@ public class CprTrainerBackendApplication {
                     System.out.println("✅ Performance depth details başarıyla eklendi!");
                     if(databaseAdapter.saveFreqArray(performanceData.getFreqArray(), performanceData.getUid(),"F")){
                         System.out.println("✅ Performance freq details başarıyla eklendi!");
-                        if (databaseAdapter.savePerformanceNotes(openAiResponse, performanceData.getUid(), "A")){
-                            System.out.println("✅ Performance notes başarıyla eklendi!");
-                        } else {
-                            System.err.println("❌ Performance notes eklenirken hata oluştu!");
-                        }
+                         if (databaseAdapter.savePerformanceNotes(openAiResponse, performanceData.getUid(), "A")){
+                             System.out.println("✅ Performance notes başarıyla eklendi!");
+                            if(databaseAdapter.savePositionArray(performanceData.getPositionArray(), performanceData.getUid())){
+                                System.out.println("✅ Performance position details başarıyla eklendi!");
+                            } else {
+                                System.err.println("❌ Performance position details eklenirken hata oluştu!");
+                            }
+                         } else {
+                             System.err.println("❌ Performance notes eklenirken hata oluştu!");
+                         }
+                        
                     }
                     else {
                         System.err.println("❌ Performance freq details eklenirken hata oluştu!");
@@ -252,7 +259,7 @@ public class CprTrainerBackendApplication {
     }
 
     //get uid from email in getmapping
-    
+   @CrossOrigin(origins = "*") // Allow all origins (use with caution)
    @GetMapping("/getUid")
     public String getUid(@RequestParam String email) {
         try {

@@ -96,10 +96,10 @@ public class DatabaseAdapter {
             for(int i=0; i<DepthArray.size(); i++){
                 
                     String sql = "INSERT INTO `cpr`.`performancedetails` (" +
-                                "performanceId, detailType, val" +
-                                ") VALUES (?, ?, ?)";
+                                "performanceId, compressionId, detailType, val" +
+                                ") VALUES (?, ?, ?, ?)";
             
-                    jdbcTemplate.update(sql, lastPerformanceId,type, DepthArray.get(i));                
+                    jdbcTemplate.update(sql, lastPerformanceId, i+1, type, DepthArray.get(i));                
             }
             return true;
         } catch (Exception e) {
@@ -114,10 +114,10 @@ public class DatabaseAdapter {
             for(int i=0; i<FreqArray.size(); i++){
                 
                     String sql = "INSERT INTO `cpr`.`performancedetails` (" +
-                                "performanceId, detailType, val" +
-                                ") VALUES (?, ?, ?)";
+                                "performanceId, compressionId, detailType, val" +
+                                ") VALUES (?, ?, ?, ?)";
             
-                    jdbcTemplate.update(sql, lastPerformanceId, type, FreqArray.get(i));                
+                    jdbcTemplate.update(sql, lastPerformanceId, i+1, type, FreqArray.get(i));                
             }
             return true;
         } catch (Exception e) {
@@ -151,6 +151,24 @@ public class DatabaseAdapter {
             return true;
         } catch (Exception e) {
             System.err.println("❌ Performans notu eklenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public Boolean savePositionArray(List<Double> positionArray, int uid){
+        int lastPerformanceId = getLastPerformanceByUid(uid);
+        try {
+            for(int i=0; i<positionArray.size(); i++){
+                
+                    String sql = "INSERT INTO `cpr`.`positiondetails` (" +
+                                "performanceId, compressionId, val" +
+                                ") VALUES (?, ?, ?)";
+            
+                    jdbcTemplate.update(sql, lastPerformanceId, i+1, positionArray.get(i));                
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Performans eklenirken hata oluştu: " + e.getMessage());
             return false;
         }
     }
