@@ -1,10 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, User, ChevronDown, Filter, Clock } from 'lucide-react';
-import { ThemeToggle } from './components/ThemeToggle';
-import cprLogo from './assets/cprLogo.jpg';
+import { useState, useRef, useEffect } from 'react';
+import { Calendar, ChevronDown, Filter, Clock } from 'lucide-react';
 import Performance from './types/Performance';
-import { useNavigate } from 'react-router';
 import CPRPerformanceDetailPopup from './PerformanceDetails';
+import TopBar from './TopBar';
+import User from './types/User';
 
 // TypeScript interfaces
 type FeedbackType = 'A' | 'H' | 'V';
@@ -18,6 +17,19 @@ function CPRPerformanceDashboard() {
   const [depthData, setDepthData] = useState<{ compression: number; depth: number }[]>([]);
   const [freqData, setFreqData] = useState<{ compression: number; frequency: number }[]>([]);
   const [positionData, setPositionData] = useState<{ compression: number; position: number }[]>([]);
+  const [userData, setUserData] = useState<User>(
+    {
+      id: -1,
+      firstname: "",
+      surname: "",
+      username: "",
+      email: "",
+      password: "",
+      khasID: "",
+      role: "",
+      createdAt: "",
+    }
+  );
 
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
@@ -27,8 +39,6 @@ function CPRPerformanceDashboard() {
     setSelectedTypes(['A', 'H', 'V']);
   };
   
-  const navigate = useNavigate();
-
   // Handle viewing performance details
   const handleViewDetails = (performance: Performance) => {
     const minLength = Math.min(performance.depthArray.length, performance.freqArray.length);
@@ -114,8 +124,9 @@ function CPRPerformanceDashboard() {
       });
 
       if (response.ok) {
-        const userData = await response.json();
-        console.log("User data retrieved:", userData);
+        const user = await response.json();
+        setUserData(user);
+        console.log("User data retrieved:", user);
       } else {
         console.error("Failed to fetch user data");
       }
@@ -186,35 +197,7 @@ function CPRPerformanceDashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Top navigation bar */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center cursor-pointer">
-              {/* Logo */}
-              <div className="flex-shrink-0 flex items-center">
-                <img src={cprLogo} alt="Logo" className="h-8 w-8 rounded-md" />
-                <span className="ml-2 font-semibold text-gray-900 dark:text-white transition-colors">CPR Track</span>
-              </div>
-            </div>
-            
-            {/* Right section */}
-            <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <ThemeToggle />
-              
-              <div className="ml-4 flex items-center">
-                {/* Profile dropdown */}
-                <div className="relative">
-                  <button className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer" onClick={() => navigate('/profile')}>
-                    <span className="sr-only">View profile</span>
-                    <User className="h-6 w-6" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <TopBar />
       
       {/* Main content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -387,6 +370,7 @@ function CPRPerformanceDashboard() {
           depthData={depthData}
           freqData={freqData}
           positionData={positionData}
+          role={userData.role}
           onClose={() => setShowPopup(false)}
         />
       )}

@@ -4,30 +4,21 @@ import Performance from './types/Performance'; // Import your existing Performan
 import { JSX } from 'react/jsx-runtime';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, ReferenceArea } from 'recharts';
 import PerformanceNote from './types/PerformanceNote';
-
-type FeedbackType = 'excellent' | 'good' | 'needs-improvement' | 'all';
-
-// Additional metrics not included in the Performance type
-/*interface DetailedMetrics {
-  fullReleasePercentage: number;
-  detailedNotes: string;
-  // Per-compression data
-  depthData: Array<{ compression: number; depth: number }>;
-  frequencyData: Array<{ compression: number; rate: number }>;
-}*/
+import chatgptIcon from './assets/chatgpt.svg';
 
 interface CPRPerformanceDetailPopupProps {
   performance: Performance;
   depthData: Array<{ compression: number; depth: number }>;
   freqData: Array<{ compression: number; frequency: number }>;
   positionData: Array<{ compression: number; position: number }>;
+  role: string;
   onClose: () => void;
 }
 
-function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
+function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionData, role, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<'metrics' | 'notes' | 'statistics'>('metrics');
   const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
-  const [humanNotes, setHumanNotes] = useState<string[]>([]);
+  const [instructorNote, setInstructorNote] = useState<string>("");
  
   useEffect(() => {
     async function getPerformanceNote(){
@@ -43,7 +34,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
       if (performanceNotesResponse.ok) {
         const performanceNotesData = await performanceNotesResponse.json();
         console.log("Performance notes data retrieved:", performanceNotesData);
-        const humanNotesArray: string[] = [];
+        const instructorNoteArray: string[] = [];
         const aiNotesArray: PerformanceNote[] = [];
 
         performanceNotesData.forEach((noteObj: {
@@ -53,7 +44,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
           note: string;
         }) => {
           if (noteObj.notetype === 'H') {
-            humanNotesArray.push(noteObj.note);
+            instructorNoteArray.push(noteObj.note);
           } else if (noteObj.notetype === 'A') {
             const parsedNotes: PerformanceNote[] = noteObj.note ? JSON.parse(noteObj.note) : [];
             aiNotesArray.push(...parsedNotes);
@@ -61,8 +52,8 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
         });
 
         console.log("AI notes:", aiNotesArray);
-        console.log("Human notes:", humanNotesArray);
-        setHumanNotes(humanNotesArray);
+        console.log("Human notes:", instructorNoteArray);
+        setInstructorNote(instructorNoteArray[0]);
         setAiNotes(aiNotesArray);
       }
     }
@@ -101,12 +92,36 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
     }
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  const handleSaveInstructorNote = async (note: string) => {
+    const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const performanceData = performance;
+    const response = await fetch(`api/auth/saveInstructorNote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token ? token.split('=')[1] : ''}`
+      },
+      body: JSON.stringify({
+        performanceid: performanceData.id,
+        notetype: 'H',
+        note: note
+      })
+    });
+    if (response.ok) {
+      console.log("Instructor note saved successfully");
+      alert("Instructor note saved successfully");
+    } else {
+      console.error("Error saving instructor note");
+      alert("Error saving instructor note");
+    }
+  };
   
 
   const IDEAL_MIN_FREQ = 100;
   const IDEAL_MAX_FREQ = 120;
   const IDEAL_MIN_DEPTH = 50;
-  const IDEAL_MAX_DEPTH = 60;
+  const IDEAL_MAX_DEPTH = 60;  
 
   return (
     <div className="fixed inset-0 bg-black/40 bg-opacity-30 flex justify-center items-start pt-24 z-50 overflow-y-auto">
@@ -318,7 +333,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
                       />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value:string, name:string) => [`${value} mm`, 'Depth']}
+                        formatter={(value:string) => [`${value} mm`, 'Depth']}
                         labelFormatter={(label:string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
@@ -399,7 +414,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
                       />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value:string, name:string) => [`${value} bpm`, 'Rate']}
+                        formatter={(value:string) => [`${value} bpm`, 'Rate']}
                         labelFormatter={(label:string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
@@ -482,13 +497,13 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
                         stroke="#9CA3AF"
                         label={{ value: 'Position Score', angle: -90, position: 'insideLeft', offset: 10 }}
                         domain={[
-                          Math.min(...positionData.map(d => d.position)) - 5,
-                          Math.max(...positionData.map(d => d.position)) + 5
+                          Math.min(...positionData.map(d => d.position)),
+                          Math.max(...positionData.map(d => d.position))
                         ]}
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value: string, name: string) => [`${value} point`, 'Position']}
+                        formatter={(value: string) => [`${value} point`, 'Position']}
                         labelFormatter={(label: string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
@@ -555,14 +570,58 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
           ) : (
             <div className="space-y-4">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">Instructor Notes</h3>
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 ">
                 <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">
-                  {humanNotes.length > 0 ? humanNotes.join('\n') : 'No instructor notes available.'}
+                  {
+                    role === 'user' && (instructorNote === undefined ? "No notes available." : instructorNote)
+                  }
                 </p>
+
+                {
+                  role === 'instructor' && (
+                    <div className="flex flex-row items-center justify-between gap-4">
+                      <input
+                        type="text"
+                        className="flex-1 w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:text-white"
+                        placeholder="Add your notes here..."
+                        value={instructorNote}
+                        onChange={(e) => setInstructorNote(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const newNote = e.currentTarget.value.trim();
+                            if (newNote) {
+                              handleSaveInstructorNote(newNote);
+                              // State'i temizleme artık gerekmiyor çünkü zaten controlled component
+                            }
+                          }
+                        }}
+                      />
+                      <button
+                        className="flex-shrink-0 px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 transition-all cursor-pointer"
+                        onClick={() => {
+                          const newNote = instructorNote.trim();
+                          if (newNote) {
+                            handleSaveInstructorNote(newNote);
+                          }
+                        }}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  )
+                }
               </div>
               
               <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">Key Takeaways</h3>
+                <div className="flex items-center flex-row mb-3">
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white">Key Takeaways</h3>
+                  <div className="ml-2">
+                    <div className="flex items-center bg-gray-100 dark:bg-gray-700/50 rounded-full px-2 py-1">
+                      <img src={chatgptIcon} alt="AI Icon" className="h-4 w-4 text-blue-600 dark:text-blue-400 mr-1" />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">Generated by ChatGPT 4o</span>
+                    </div>
+                  </div>
+                </div>
                 <ul className="space-y-2">
                   {
                     aiNotes.map((message, key) => (

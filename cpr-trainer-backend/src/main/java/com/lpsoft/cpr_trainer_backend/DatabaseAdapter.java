@@ -6,7 +6,9 @@ import javax.sql.DataSource;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DatabaseAdapter {
 
     private final JdbcTemplate jdbcTemplate;
@@ -138,19 +140,25 @@ public class DatabaseAdapter {
 
     public Boolean saveInstructorNote(int performanceid, String noteType, String note) {
         try {
-            String sql = "INSERT INTO `cpr`.`performancenotes` (" +
-                         "performanceid, notetype, note" +
-                         ") VALUES (?, ?, ?)";
+            // Önce bu performanceid ve notetype için kayıt var mı kontrol edelim
+            String checkSql = "SELECT COUNT(*) FROM `cpr`.`performancenotes` " +
+                             "WHERE performanceid = ? AND notetype = ?";
+            int count = jdbcTemplate.queryForObject(checkSql, Integer.class, performanceid, noteType);
     
-            jdbcTemplate.update(sql,
-                performanceid,
-                noteType,
-                note
-            );
-            
+            if (count > 0) {
+                // Kayıt varsa UPDATE yap
+                String updateSql = "UPDATE `cpr`.`performancenotes` SET note = ? " +
+                                 "WHERE performanceid = ? AND notetype = ?";
+                jdbcTemplate.update(updateSql, note, performanceid, noteType);
+            } else {
+                // Kayıt yoksa INSERT yap
+                String insertSql = "INSERT INTO `cpr`.`performancenotes` " +
+                                  "(performanceid, notetype, note) VALUES (?, ?, ?)";
+                jdbcTemplate.update(insertSql, performanceid, noteType, note);
+            }
             return true;
         } catch (Exception e) {
-            System.err.println("❌ Performans notu eklenirken hata oluştu: " + e.getMessage());
+            System.err.println("❌ Performans notu eklenirken/güncellenirken hata oluştu: " + e.getMessage());
             return false;
         }
     }

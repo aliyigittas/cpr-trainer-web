@@ -44,6 +44,12 @@ public class AuthController {
     @Autowired
     private PositionDetailsRepository positionDetailsRepository;
 
+    private final DatabaseAdapter databaseAdapter;
+
+    public AuthController(DatabaseAdapter databaseAdapter) {
+        this.databaseAdapter = databaseAdapter;
+    }
+
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -118,7 +124,12 @@ public class AuthController {
 
             // Performansları al
             int uid = user.getId();
-            performances = performanceRepository.findByUid(uid);
+            if (user.getRole().equals("instructor")) {
+                performances = performanceRepository.findAll();
+            } else {
+                performances = performanceRepository.findByUid(uid);
+            }
+            //performances = performanceRepository.findByUid(uid);
             if (performances.isEmpty()) {
                 System.out.println("No performances found for user ID: " + uid);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(performances);
@@ -173,26 +184,27 @@ public class AuthController {
     }
     
 
-    @PostMapping("/addInstructorNote")
-    public ResponseEntity<String> addInstructorNote(@RequestHeader("Authorization") String authHeader, @RequestBody Map<String, String> body) {
+    @PostMapping("/saveInstructorNote")
+    public ResponseEntity<String> saveInstructorNote(@RequestHeader("Authorization") String authHeader, @RequestBody Map<String, String> body) {
         
         String performanceid = body.get("performanceid");
         String note = body.get("note");
+        String notetype = body.get("notetype");
 
         try {
             ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
-            if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
-                // Handle unauthorized access
-            }
             User user = (User) userInfoResponse.getBody();
             if (user == null) {
-                // Handle user not found
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
             }
             else {
                 // Kullanıcı bilgilerini al
                 System.out.println("User found: " + user.getUsername());
-                //TODO: check if the user is admin from above response and continue adding note
-                //saveInstructorNote(Integer.parseInt(performanceid), "Instructor", note);
+                if (!user.getRole().equals("instructor")) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only instructors can add notes.");
+                }
+                databaseAdapter.saveInstructorNote(Integer.parseInt(performanceid), notetype, note);
+                //TODO: create dump to database
             }
             
         } catch (Exception e) {
@@ -202,10 +214,7 @@ public class AuthController {
 
         System.out.println("Performance ID: " + performanceid);
         System.out.println("Instructor Note: " + note);
-        //TODO: DBye ekle
-
         
         return ResponseEntity.ok("Instructor note added successfully.");
     }
-    
 }

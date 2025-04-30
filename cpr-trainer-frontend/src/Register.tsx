@@ -15,6 +15,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     khasID: "",
+    role: "user", // default role
   });
     const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -195,25 +196,64 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="khasID"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-              >
-                KhasID (Optional)
-              </label>
-              <div className="mt-1">
-                <input
-                  id="khasID"
-                  name="khasID"
-                  type="text"
-                  value={formData.khasID}
-                  onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                  placeholder="Enter your KhasID if you have one"
-                />
+            <div className="flex items-center flex-row justify-between gap-3">
+              <div>
+                <label
+                  htmlFor="khasID"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  KhasID (Optional)
+                </label>
+                <div className="mt-1">
+                  <input
+                    id="khasID"
+                    name="khasID"
+                    type="text"
+                    value={formData.khasID}
+                    onChange={handleChange}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                    placeholder="Your KhasID if you have"
+                  />
+                </div>
+              </div>
+              {/* Role selection switch */}
+              <div className="flex-1">
+                <label
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Select Role
+                </label>
+                <div className="mt-1">
+                  <div className="flex items-center p-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, role: "user" }))}
+                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                        formData.role === "user"
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      User
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, role: "instructor" }))}
+                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
+                        formData.role === "instructor"
+                          ? "bg-blue-600 text-white shadow-sm"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
+                    >
+                      Instructor
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
+
+
+            
           </div>
 
           <div className="flex items-center">

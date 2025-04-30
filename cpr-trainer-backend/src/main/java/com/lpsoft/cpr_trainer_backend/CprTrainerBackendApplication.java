@@ -4,11 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import javax.sql.DataSource;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,14 +30,9 @@ public class CprTrainerBackendApplication {
 
     private final DatabaseAdapter databaseAdapter;
 
-    //@Autowired
-    public CprTrainerBackendApplication(DataSource dataSource) {
-        this.databaseAdapter = new DatabaseAdapter(dataSource);
-    }
-
-    @Bean
-    public DatabaseAdapter databaseAdapter(DataSource dataSource) {
-        return new DatabaseAdapter(dataSource);
+    // Spring otomatik olarak DatabaseAdapter'ı enjekte eder
+    public CprTrainerBackendApplication(DatabaseAdapter databaseAdapter) {
+        this.databaseAdapter = databaseAdapter;
     }
 
 	public static void main(String[] args) {
