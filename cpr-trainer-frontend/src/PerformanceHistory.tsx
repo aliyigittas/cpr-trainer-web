@@ -17,6 +17,8 @@ function CPRPerformanceDashboard() {
   const [selectedPerformance, setSelectedPerformance] = useState<Performance | null>(null);
   const [depthData, setDepthData] = useState<{ compression: number; depth: number }[]>([]);
   const [freqData, setFreqData] = useState<{ compression: number; frequency: number }[]>([]);
+  const [positionData, setPositionData] = useState<{ compression: number; position: number }[]>([]);
+
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
   const filterRef = useRef<HTMLDivElement | null>(null);
@@ -40,10 +42,16 @@ function CPRPerformanceDashboard() {
       compression: index + 1,
       frequency: Math.max(0, freqValue),
     }));
+
+    const newPositionData = performance.positionArray.map((positionValue, index) => ({
+      compression: index+1,
+      position: Math.max(0, positionValue),
+    }));
     
     setSelectedPerformance(performance);
     setDepthData(newDepthData);
     setFreqData(newFreqData);
+    setPositionData(newPositionData);
     setShowPopup(true);
   };
 
@@ -378,6 +386,7 @@ function CPRPerformanceDashboard() {
           performance={selectedPerformance}
           depthData={depthData}
           freqData={freqData}
+          positionData={positionData}
           onClose={() => setShowPopup(false)}
         />
       )}

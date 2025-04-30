@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceDetailsRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceNotesRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
+import com.lpsoft.cpr_trainer_backend.interfaces.PositionDetailsRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
 
 
@@ -39,6 +40,9 @@ public class AuthController {
 
     @Autowired
     private PerformanceNotesRepository performanceNotesRepository;
+
+    @Autowired
+    private PositionDetailsRepository positionDetailsRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -136,6 +140,18 @@ public class AuthController {
 
                 perf.setDepthArray(depthArray);
                 perf.setFreqArray(freqArray);
+            }
+
+            for (Performance perf : performances) {
+                List<PositionDetails> position = positionDetailsRepository.findByPerformanceIdOrderByCompressionIdAsc(perf.getId());
+                
+                List<Double> positionScore = new ArrayList<>();
+                
+                for (PositionDetails detail : position) {
+                    positionScore.add(detail.getVal()*100);
+                }
+
+                perf.setPositionArray(positionScore);
             }
 
             System.out.println("Performances with arrays: " + performances);

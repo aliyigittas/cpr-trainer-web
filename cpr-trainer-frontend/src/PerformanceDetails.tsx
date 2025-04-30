@@ -20,87 +20,15 @@ interface CPRPerformanceDetailPopupProps {
   performance: Performance;
   depthData: Array<{ compression: number; depth: number }>;
   freqData: Array<{ compression: number; frequency: number }>;
+  positionData: Array<{ compression: number; position: number }>;
   onClose: () => void;
 }
 
-function CPRPerformanceDetailPopup({ performance, depthData, freqData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
+function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionData, onClose }: CPRPerformanceDetailPopupProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<'metrics' | 'notes' | 'statistics'>('metrics');
   const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
   const [humanNotes, setHumanNotes] = useState<string[]>([]);
-
-  
-  console.log("freq:"+freqData);
-  // Mock data for metrics not in the original performance object
-  // Generate sample time-series data for depth and frequency
- // Generate sample per-compression data based on the performance metrics
- /*const generateCompressionData = () => {
-  const depthData = [];
-  const frequencyData = [];
-  
-  // Use totalCompression count to generate data for each compression
-  for (let i = 1; i <= performance.totalCompression; i++) {
-    // Create variations in depth with occasional outliers
-    let depthValue = performance.meanDepth;
-    
-    // Add some randomness and patterns to simulate real data
-    if (i % 20 < 10) {
-      // Gradually decrease depth to simulate fatigue
-      depthValue -= (i % 10) * (performance.stdDepth / 5);
-    } else {
-      // Recovery period with improved depth
-      depthValue += (performance.stdDepth / 3);
-    }
-    
-    // Add random variation
-    depthValue += ((Math.random() * 2) - 1) * performance.stdDepth;
-    
-    // Add occasional outliers
-    if (i % 25 === 0) depthValue += performance.stdDepth * 2; // Too deep
-    if (i % 30 === 0) depthValue -= performance.stdDepth * 2; // Too shallow
-    
-    depthData.push({
-      compression: i,
-      depth: Math.max(0, depthValue)
-    });
-    
-    // Similar pattern for frequency/rate data
-    let rateValue = performance.meanFreq;
-    
-    // Add some pattern to the data
-    if (i % 15 < 7) {
-      // Gradually increase rate
-      rateValue += (i % 7) * (performance.stdFreq / 4);
-    } else {
-      // Gradual decrease
-      rateValue -= (performance.stdFreq / 2);
-    }
-    
-    // Add random variation
-    rateValue += ((Math.random() * 2) - 1) * performance.stdFreq;
-    
-    // Add occasional outliers
-    if (i % 22 === 0) rateValue += performance.stdFreq * 2; // Too fast
-    if (i % 28 === 0) rateValue -= performance.stdFreq * 2; // Too slow
-    
-    frequencyData.push({
-      compression: i,
-      rate: Math.max(0, rateValue)
-    });
-  }
-  
-  return { depthData, frequencyData };
-};
-
-const compressionData = generateCompressionData();
-
-const detailedMetrics: DetailedMetrics = {
-  fullReleasePercentage: 92,
-  detailedNotes: "Overall performance shows good technique with consistent depth. Some improvements needed in maintaining proper rhythm throughout the session. Compression depth was occasionally too shallow in the middle of the session, possibly indicating fatigue. Hand positioning was excellent throughout the training.",
-  depthData: compressionData.depthData,
-  frequencyData: compressionData.frequencyData
-};*/
-
-
+ 
   useEffect(() => {
     async function getPerformanceNote(){
       const token = document.cookie.split('; ').find(row => row.startsWith('token='));
@@ -528,11 +456,66 @@ const detailedMetrics: DetailedMetrics = {
                   </div>
                   <div className="flex items-center">
                     <span className="inline-block w-3 h-1 bg-gray-400 stroke-dasharray-2 mr-1"></span>
-                    <span>Mean Depth ({performance.meanFreq.toFixed(1)} bpm)</span>
+                    <span>Mean Frequency ({performance.meanFreq.toFixed(1)} bpm)</span>
                   </div>
                 </div>
               </div>
               
+              {/*Position Chart - Per Compression*/}
+              <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Position by Compression
+                </h4>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart
+                      data={positionData}
+                      margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.2} />
+                      <XAxis
+                        dataKey="compression"
+                        stroke="#9CA3AF"
+                        label={{ value: 'Compression Number', position: 'insideBottom', offset: -5 }}
+                      />
+                      <YAxis
+                        stroke="#9CA3AF"
+                        label={{ value: 'Position Score', angle: -90, position: 'insideLeft', offset: 10 }}
+                        domain={[
+                          Math.min(...positionData.map(d => d.position)) - 5,
+                          Math.max(...positionData.map(d => d.position)) + 5
+                        ]}
+                      />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
+                        formatter={(value: string, name: string) => [`${value} point`, 'Position']}
+                        labelFormatter={(label: string) => `Compression #${label}`}
+                      />
+                      <Legend verticalAlign="top" height={36} />
+                      <Line
+                        type="monotone"
+                        dataKey="position"
+                        name="Position"
+                        stroke="#3B82F6"
+                        strokeWidth={2}
+                        dot={false}
+                        activeDot={{ r: 6, stroke: '#2563EB', strokeWidth: 2, fill: '#93C5FD' }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="mt-4 flex flex-wrap justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center mr-4">
+                    <span className="inline-block w-3 h-3 bg-blue-500 rounded-full mr-1"></span>
+                    <span>Actual Position Score</span>
+                  </div>
+                  <div className="flex items-center">
+                    Overall Position Score: {(positionData.reduce((sum, d) => sum + d.position, 0) / positionData.length).toFixed(1)}/100
+                  </div>
+                </div>
+              </div>
+
               {/* Performance Summary */}
               <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Performance Summary</h4>
