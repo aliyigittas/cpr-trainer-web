@@ -17,8 +17,8 @@ public class DatabaseAdapter {
 
     public Boolean registerUser(User user) {
         try {
-            String sql = "INSERT INTO `cpr`.`users` (firstname, surname, email, password, khasID) VALUES (?, ?, ?, ?, ?)";
-            jdbcTemplate.update(sql, user.getFirstname(), user.getSurname(), user.getEmail(), user.getPassword(), user.getKhasID());
+            String sql = "INSERT INTO `cpr`.`users` (firstname, surname, email, password, khasID, role, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            jdbcTemplate.update(sql, user.getFirstname(), user.getSurname(), user.getEmail(), user.getPassword(), user.getKhasID(), user.getRole(), user.getCreatedAt());
             return true;
         } catch (DataAccessException e) {
             System.err.println("❌ Kullanıcı eklenirken hata oluştu: " + e.getMessage());

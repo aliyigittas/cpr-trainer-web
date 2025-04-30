@@ -1070,6 +1070,8 @@ CREATE TABLE `users` (
   `email` varchar(255) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `khasID` varchar(255) DEFAULT NULL,
+  `role` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1081,9 +1083,9 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054'),
-(10,'da','asd','sad','a@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213'),
-(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd');
+(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054', 'user', '2025-04-22 15:45:27'),
+(10,'da','asd','sad','a@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213', 'user', '2025-04-22 15:45:27'),
+(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd', 'user', '2025-04-22 15:45:27'),
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

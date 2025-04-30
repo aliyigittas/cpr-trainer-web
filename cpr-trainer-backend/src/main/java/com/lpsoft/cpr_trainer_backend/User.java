@@ -25,6 +25,10 @@ public class User {
     private String password;
 
     private String khasID;
+
+    private String role;
+
+    private String createdAt;
  
     // Constructor
 
@@ -32,7 +36,7 @@ public class User {
  
     // Full Constructor
 
-    public User(int id, String firstname, String surname, String username, String email, String password, String khasID) {
+    public User(int id, String firstname, String surname, String username, String email, String password, String khasID, String role, String createdAt) {
 
         this.id = id;
 
@@ -47,6 +51,10 @@ public class User {
         this.password = password;
 
         this.khasID = khasID;
+
+        this.role = role;
+
+        this.createdAt = createdAt;
 
     }
  
@@ -79,6 +87,14 @@ public class User {
     public String getKhasID() { return khasID; }
 
     public void setKhasID(String khasID) { this.khasID = khasID; }
+
+    public String getRole() { return role; }
+
+    public void setRole(String role) { this.role = role; }
+
+    public String getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
 }
 

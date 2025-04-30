@@ -6,6 +6,8 @@ type User = {
   email: string;
   password: string;
   khasID: string;
+  role: string;
+  createdAt: string;
 };
 
 export default User;
