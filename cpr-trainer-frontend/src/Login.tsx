@@ -2,7 +2,7 @@ import { useState } from "react";
 import { LogIn, UserPlus } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import SHA256 from 'crypto-js/sha256';
 // Login Page Component
 export default function LoginPage() {
@@ -10,12 +10,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string>('');
   const [token, setToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); // Hata mesajını temizle
 
     try {
       console.log("Login attempt with:", { username, password });
@@ -29,10 +27,11 @@ export default function LoginPage() {
       });
 
       // Backend'den gelen token'ı alıyoruz
+      console.log('Response from server:', response.data);
       const { token } = response.data;
 
       // Token'ı state'e kaydediyoruz
-      setToken(token);
+      setToken(response.data.token);
 
       console.log('Token received:', token);
       // Token ile yapılacak işlemleri burada ekleyebilirsin (örneğin, auth context veya localStorage)
@@ -40,9 +39,9 @@ export default function LoginPage() {
       document.cookie = `token=${token}; path=/;`;
       // Redirect to performance history page
       navigate("/performanceHistory");
-    } catch (err: any) {
-      console.error('Login failed:', err.message);
-      setError('Login failed. Please check your credentials and try again.');
+    } catch (err: unknown) {
+      console.error('Login failed:', (err as AxiosError).message);
+      alert('Login failed. Please check your credentials and try again.');
     }
   };
 
