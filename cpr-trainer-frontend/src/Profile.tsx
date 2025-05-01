@@ -1,22 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Check, X, User } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom'; // react-router-dom'dan import edildi
 import cprLogo from './assets/cprLogo.jpg';
 import SHA256 from 'crypto-js/sha256';
 import axios from "axios";
 import TopBar from './TopBar';
 
-const userData = {
-  name: 'Alex Johnson',
-  email: 'alex.johnson@example.com'
-};
+interface UserData {
+  id: number;
+  firstname: string;
+  surname: string;
+  username: string;
+  email: string;
+  khasID: string;
+  role: string;
+  createdAt: string;
+}
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState(userData.name);
-  const [email, setEmail] = useState(userData.email);
-  const [infoSaved, setInfoSaved] = useState(false);
+  const [userData, setUserData] = useState<UserData>({
+    id: 0,
+    firstname: '',
+    surname: '',
+    username: '',
+    email: '',
+    khasID: '',
+    role: '',
+    createdAt: ''
+  });
+  const [loading, setLoading] = useState(true);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -26,15 +40,51 @@ export default function ProfilePage() {
   const [passwordChanged, setPasswordChanged] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [infoSaved, setInfoSaved] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+        const response = await fetch('/api/auth/me', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `${token ? token.split('=')[1] : ''}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setUserData(data);
+          // Kullanıcı verilerini form alanlarına ata
+          setFullName(`${data.firstname} ${data.surname}`);
+          setEmail(data.email);
+        } else {
+          console.error('Kullanıcı bilgileri alınamadı');
+          navigate('/login');
+        }
+      } catch (error) {
+        console.error('Bir hata oluştu:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [navigate]);
+  
   const handleSaveInfo = (e: React.FormEvent) => {
     e.preventDefault();
+    // Bu fonksiyonu mevcut haliyle bırakıyoruz
+    setInfoSaved(true);
     setTimeout(() => {
-      setInfoSaved(true);
-      setTimeout(() => setInfoSaved(false), 3000);
-    }, 500);
+      setInfoSaved(false);
+    }, 3000);
   };
-
+  
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -87,6 +137,10 @@ export default function ProfilePage() {
     }
   };
 
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Top Bar */}
@@ -107,6 +161,34 @@ export default function ProfilePage() {
             </div>
           )}
 
+          <div className="space-y-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                {userData.username}
+              </div>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                {userData.email}
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Created At</label>
+              <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 text-sm border border-gray-300 dark:border-gray-600">
+                {userData.createdAt ? new Date(userData.createdAt).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : 'Not available'}
+              </div>
+            </div>
+          </div>
+
+          
+
           <form onSubmit={handleSaveInfo} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
@@ -114,15 +196,6 @@ export default function ProfilePage() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -235,5 +308,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-
