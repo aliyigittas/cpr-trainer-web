@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronDown, Filter, Clock } from 'lucide-react';
+import { Calendar, ChevronDown, Filter, Clock, UserCircle2Icon } from 'lucide-react';
 import Performance from './types/Performance';
 import CPRPerformanceDetailPopup from './PerformanceDetails';
 import TopBar from './TopBar';
@@ -41,6 +41,8 @@ function CPRPerformanceDashboard() {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
   const filterRef = useRef<HTMLDivElement | null>(null);
+  const [usernames, setUsernames] = useState<{ [key: number]: string }>({});
+
    // Select all feedback types
    const selectAllTypes = (): void => {
     setSelectedTypes(['A', 'H', 'V']);
@@ -82,6 +84,31 @@ function CPRPerformanceDashboard() {
     }
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
+
+  const fetchUsernames = async (performances: Performance[]) => {
+    const uniqueIds = [...new Set(performances.map(p => p.uid))];
+  
+    const userMap: { [key: number]: string } = {};
+    await Promise.all(uniqueIds.map(async (uid: number) => {
+      const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+      console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
+      
+      const response = await fetch(`/api/auth/getUsername?uid=${uid}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `${token ? token.split('=')[1] : ''}`
+        }
+      });
+      
+      const username = await response.text();
+      userMap[uid] = username;
+    }));
+  
+    setUsernames(userMap);
+    console.log("username:", usernames);
+  };
+  
 
   // Toggle the filter dropdown
   const toggleFilterDropdown = (): void => {
@@ -150,6 +177,12 @@ function CPRPerformanceDashboard() {
     }
     getUserInfo();
   }, []);
+
+  useEffect(() => {
+    if (performances.length > 0) {
+      fetchUsernames(performances);
+    }
+  }, [performances]);
 
   // Fetch performance data 
   useEffect(() => {
@@ -336,6 +369,15 @@ function CPRPerformanceDashboard() {
                     <span className="mx-2 text-gray-300 dark:text-gray-600">•</span>
                     <Clock className="h-5 w-5 text-gray-400 dark:text-gray-500" />
                     <span className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">{performance.performanceDate}</span>
+                    {userData.role === "instructor" && (
+                    <>
+                      <span className="mx-2 text-gray-300 dark:text-gray-600">•</span>
+                      <UserCircle2Icon className="h-5 w-5 text-gray-400 dark:text-gray-500" />
+                      <span className="ml-2 text-sm font-medium text-gray-500 dark:text-gray-400">
+                        {usernames[performance.uid] || 'Unknown User'}
+                      </span>
+                    </>
+                  )}
                   </div>
                   {/* Feedback Type Badge */}
                   <div className="flex space-x-1">

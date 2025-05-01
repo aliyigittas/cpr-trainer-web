@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -327,5 +328,31 @@ public class AuthController {
                     .body("An error occurred: " + e.getMessage());
         }
     }
-    
+
+    @GetMapping("/getUsername")
+    public ResponseEntity<String> getUsername(@RequestParam("uid") Integer uid, @RequestHeader("Authorization") String authHeader) {
+        try {
+            // Fetch user info (authentication)
+            ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+            User user = (User) userInfoResponse.getBody();
+            
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
+            }
+            
+            // Fetch the username based on the provided uid
+            Optional<User> userDetails = userRepository.findById(uid);
+            
+            if (userDetails.isPresent()) {
+                String username = userDetails.get().getUsername();
+                System.out.println("username:" + username);
+                return ResponseEntity.ok(username);  // Return the username
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Username not found for the given UID.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error occurred while fetching user info: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
+        }
+    }
 }
