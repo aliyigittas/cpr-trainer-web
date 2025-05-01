@@ -26,6 +26,7 @@ export default function LoginPage() {
       const response = await axios.post('api/auth/login', {
         username: username,
         password: hashedPassword,
+        khasID: username,
       });
 
       // Backend'den gelen token'ı alıyoruz

@@ -29,6 +29,22 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!/^[A-Za-z]/.test(formData.username)) {
+      alert("Username must start with a letter.");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      alert("Password must be at least 6 characters.");
+      return;
+    }
+
+    if(formData.password != confirmPassword){
+      alert("Password and confirm password don't match.");
+      return;
+    }
+
     console.log("Registration attempt with:", formData);
     // Here you would handle registration logic
     // hash password 
@@ -219,7 +235,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div className="flex items-center flex-row justify-between gap-3">
               <div>
                 <label
                   htmlFor="khasID"
@@ -238,45 +253,7 @@ export default function RegisterPage() {
                     placeholder="Your KhasID if you have"
                   />
                 </div>
-              </div>
-              {/* Role selection switch */}
-              <div className="flex-1">
-                <label
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                >
-                  Select Role
-                </label>
-                <div className="mt-1">
-                  <div className="flex items-center p-1 w-full bg-gray-100 dark:bg-gray-700 rounded-full">
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: "user" }))}
-                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                        formData.role === "user"
-                          ? "bg-blue-600 text-white shadow-sm"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }`}
-                    >
-                      User
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, role: "instructor" }))}
-                      className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer ${
-                        formData.role === "instructor"
-                          ? "bg-blue-600 text-white shadow-sm"
-                          : "text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                      }`}
-                    >
-                      Instructor
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
-
-
-            
           </div>
 
           <div className="flex items-center">

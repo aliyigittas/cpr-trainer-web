@@ -64,6 +64,9 @@ public class AuthController {
         else if(userRepository.findByUsername(user.getUsername()).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
+        else if(userRepository.findByKhasID(user.getKhasID()).isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This khas id is already taken.\"}");
+        }
         userRepository.save(user);
         return ResponseEntity.ok("Registration is successful.");
     }
@@ -71,10 +74,19 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
         Optional<User> dbUser = userRepository.findByUsername(user.getUsername());
+        Optional<User> dbUserKhas = userRepository.findByKhasID(user.getKhasID());
         if (dbUser.isPresent() && user.getPassword().equals(dbUser.get().getPassword())) {
             String token = jwtUtil.generateToken(user.getUsername());
+            System.out.println(token);
             return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
-        } else {
+        } 
+        else if(dbUserKhas.isPresent() && user.getPassword().equals(dbUserKhas.get().getPassword())){
+            User userKhas = userRepository.getUsernameByKhasID(user.getKhasID());
+            String token = jwtUtil.generateToken(userKhas.getUsername());
+            System.out.println(token);
+            return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
+        }
+        else{
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username or password is wrong.");
         }
     }
