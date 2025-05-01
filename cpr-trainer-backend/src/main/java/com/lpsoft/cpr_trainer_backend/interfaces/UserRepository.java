@@ -8,4 +8,5 @@ import com.lpsoft.cpr_trainer_backend.User;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     Optional<User> findByUsername(String username);
+    Optional<User> findByEmail(String email);
 }

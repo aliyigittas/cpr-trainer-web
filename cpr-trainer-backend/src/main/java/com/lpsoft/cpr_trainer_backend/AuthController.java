@@ -55,6 +55,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
+        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"Bu email ile zaten bir kullanıcı mevcut.\"}");
+        }
         userRepository.save(user);
         return ResponseEntity.ok("Kayıt başarılı");
     }

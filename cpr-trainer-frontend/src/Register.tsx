@@ -34,21 +34,29 @@ export default function RegisterPage() {
     // hash password 
     const hashedPassword = SHA256(formData.password).toString();
     formData.password = hashedPassword;
+    const now = new Date();
+    const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+
+    // Create new object to send
+    const dataToSend = {
+      ...formData,
+      createdAt: formattedDate,
+    };
     const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(dataToSend),
     });
     if (response.ok) {
         console.log("Registration successful");
         navigate("/login");
         }
     else {
-        console.error("Registration failed");
-        const errorData = await response.json();
-        console.error("Error details:", errorData);
+      console.error("Registration failed");
+      const errorData = await response.json();
+      alert("Kayıt başarısız: " + (errorData.message || "Bir hata oluştu."));
     }
   };
 
