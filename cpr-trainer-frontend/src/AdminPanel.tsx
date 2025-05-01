@@ -5,7 +5,6 @@ import {
   UserCircle,
   Mail,
   Key,
-  Shield,
   ClipboardPen,
 } from "lucide-react";
 import TopBar from "./TopBar";
@@ -45,7 +44,7 @@ function AdminPanel() {
       if (response.ok) {
         const user = await response.json();
         setUserData(user);
-        console.log("User data retrieved:", user);
+        console.log("User data retrieved:", userData);
         //if user is admin, redirect to admin page
         if (user.role !== "admin") {
           console.log("User is not admin, redirecting to login page");
@@ -232,8 +231,12 @@ function AdminPanel() {
         {/* Users List */}
         <div className="space-y-6">
           {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            <div className="flex flex-row justify-center bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
+                {/* Loading spinner or icon */}
+                <div className="animate-spin h-5 w-5 border-3 border-blue-500 border-t-transparent rounded-full mr-3 mt-0.5"></div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Loading users...
+              </p>
             </div>
           ) : users.length === 0 ? (
             <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
