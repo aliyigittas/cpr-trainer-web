@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordChanged, setPasswordChanged] = useState(false);
   const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   const handleSaveInfo = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,7 +69,7 @@ export default function ProfilePage() {
       setConfirmPassword('');
       setPasswordSuccess(true);
       setPasswordError('');
-      
+      alert('Password changed successfully!');
       // Hide success message after 3 seconds
       setTimeout(() => {
         setPasswordSuccess(false);
@@ -82,6 +83,7 @@ export default function ProfilePage() {
         setPasswordError('An error occurred. Please try again.');
       }
       setPasswordSuccess(false);
+      alert('Failed to change password. Please try again.');
     }
   };
 
@@ -233,7 +235,5 @@ export default function ProfilePage() {
     </div>
   );
 }
-function setPasswordSuccess(arg0: boolean) {
-  throw new Error('Function not implemented.');
-}
+
 
