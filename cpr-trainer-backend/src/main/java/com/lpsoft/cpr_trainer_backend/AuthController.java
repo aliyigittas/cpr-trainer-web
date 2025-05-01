@@ -263,5 +263,43 @@ public class AuthController {
                     .body("An error occurred: " + e.getMessage());
         }
     }
+
+    @PostMapping("/update-username")
+    public ResponseEntity<String> updateUsername(@RequestHeader("Authorization") String authHeader, 
+                                            @RequestBody Map<String, String> userData) {
+        try {
+            ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+            if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
+                return ResponseEntity.status(userInfoResponse.getStatusCode()).body("Unauthorized access");
+            }
+            
+            User user = (User) userInfoResponse.getBody();
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+            
+            String newUsername = userData.get("username");
+            
+            // Validate username
+            if (newUsername == null || newUsername.trim().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username cannot be empty");
+            }
+            
+            // Check if username is already taken
+            Optional<User> existingUser = userRepository.findByUsername(newUsername);
+            if (existingUser.isPresent() && existingUser.get().getId() != user.getId()) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken");
+            }
+            
+            // Update username
+            user.setUsername(newUsername);
+            userRepository.save(user);
+            
+            return ResponseEntity.ok("Username updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
     
 }

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Check, X, User } from 'lucide-react';
-import { ThemeToggle } from './components/ThemeToggle';
-import { useNavigate } from 'react-router-dom'; // react-router-dom'dan import edildi
+import { Eye, EyeOff, Check, X, User, Edit2, Save } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import cprLogo from './assets/cprLogo.jpg';
 import SHA256 from 'crypto-js/sha256';
 import axios from "axios";
@@ -40,9 +39,12 @@ export default function ProfilePage() {
   const [passwordChanged, setPasswordChanged] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
-  const [infoSaved, setInfoSaved] = useState(false);
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
+  
+  // Username editing state
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [usernameSuccess, setUsernameSuccess] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -59,9 +61,7 @@ export default function ProfilePage() {
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
-          // Kullanıcı verilerini form alanlarına ata
-          setFullName(`${data.firstname} ${data.surname}`);
-          setEmail(data.email);
+          setNewUsername(data.username);
         } else {
           console.error('Kullanıcı bilgileri alınamadı');
           navigate('/login');
@@ -76,13 +76,47 @@ export default function ProfilePage() {
     fetchUserData();
   }, [navigate]);
   
-  const handleSaveInfo = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Bu fonksiyonu mevcut haliyle bırakıyoruz
-    setInfoSaved(true);
-    setTimeout(() => {
-      setInfoSaved(false);
-    }, 3000);
+  const handleUpdateUsername = async () => {
+    if (newUsername.trim() === '') {
+      setUsernameError('Username cannot be empty');
+      return;
+    }
+    
+    if (newUsername === userData.username) {
+      setEditingUsername(false);
+      return;
+    }
+    
+    try {
+      const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
+      
+      const response = await axios.post('/api/auth/update-username', {
+        username: newUsername
+      }, {
+        headers: {
+          Authorization: token
+        }
+      });
+      
+      // Update state with new username
+      setUserData({...userData, username: newUsername});
+      setUsernameSuccess(true);
+      setUsernameError('');
+      setEditingUsername(false);
+      alert('Username updated successfully!');
+      
+      setTimeout(() => {
+        setUsernameSuccess(false);
+      }, 3000);
+      
+    } catch (error: any) {
+      if (error.response && error.response.data) {
+        setUsernameError(error.response.data);
+      } else {
+        setUsernameError('An error occurred. Please try again.');
+      }
+      alert('Failed to update username. Please try again.');
+    }
   };
   
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -154,27 +188,83 @@ export default function ProfilePage() {
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Personal Information</h2>
 
-          {infoSaved && (
+          {usernameSuccess && (
             <div className="mb-4 flex items-center p-3 rounded-md bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">
               <Check size={18} className="mr-2" />
-              Information saved successfully!
+              Username updated successfully!
+            </div>
+          )}
+          {usernameError && (
+            <div className="mb-4 flex items-center p-3 rounded-md bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-100">
+              <X size={18} className="mr-2" />
+              {usernameError}
             </div>
           )}
 
           <div className="space-y-6 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Username</label>
-              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
-                {userData.username}
+              <div className="flex items-center">
+                {editingUsername ? (
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={newUsername}
+                      onChange={(e) => setNewUsername(e.target.value)}
+                      className="w-full px-3 py-2 border border-blue-300 dark:border-blue-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="absolute right-0 top-0 h-full flex items-center pr-2">
+                      <button
+                        type="button"
+                        onClick={handleUpdateUsername}
+                        className="p-1 text-blue-500 hover:text-blue-700"
+                      >
+                        <Save size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingUsername(false);
+                          setNewUsername(userData.username);
+                          setUsernameError('');
+                        }}
+                        className="p-1 text-red-500 hover:text-red-700"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex-1 p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                      {userData.username}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingUsername(true)}
+                      className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                    >
+                      <Edit2 size={18} />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email (Read Only)</label>
               <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
                 {userData.email}
               </div>
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name (Read Only)</label>
+              <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-800 dark:text-gray-200 border border-gray-300 dark:border-gray-600">
+                {userData.firstname} {userData.surname}
+              </div>
+            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Created At</label>
               <div className="p-2 bg-gray-50 dark:bg-gray-700 rounded-md text-gray-600 dark:text-gray-400 text-sm border border-gray-300 dark:border-gray-600">
@@ -186,33 +276,13 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
-
-          
-
-          <form onSubmit={handleSaveInfo} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
-              <input
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Save Information
-            </button>
-          </form>
         </div>
 
         {/* Change Password */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Change Password</h2>
 
-          {passwordChanged && (
+          {passwordSuccess && (
             <div className="mb-4 flex items-center p-3 rounded-md bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100">
               <Check size={18} className="mr-2" />
               Password changed successfully!
@@ -303,7 +373,6 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   );
