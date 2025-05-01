@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogIn, Save } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
@@ -59,6 +59,20 @@ export default function RegisterPage() {
       alert("Kayıt başarısız: " + (errorData.message || "Bir hata oluştu."));
     }
   };
+
+  //if user has logged in already
+    useEffect(() => {
+      //check if token cookie exists
+      const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+      if (tokenCookie) {
+        
+        console.log('Token found in cookie:', tokenCookie);
+        // Redirect to performance history page
+        navigate("/performanceHistory");
+      } else {
+        console.log('No token found in cookie');
+      }
+    },[])
 
   return (
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300 dark:bg-gray-900 bg-gray-100">

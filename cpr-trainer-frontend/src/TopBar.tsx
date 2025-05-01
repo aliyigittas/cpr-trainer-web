@@ -43,7 +43,7 @@ function TopBar() {
 
             {/* Profile */}
             <button
-              className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
               onClick={() => safeNavigate("/profile")}
             >
               <span className="sr-only">View profile</span>
@@ -52,7 +52,7 @@ function TopBar() {
 
             {/* Logout */}
             <button
-              className="bg-white dark:bg-gray-800 p-1 rounded-full text-red-400 hover:text-red-600 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+              className="bg-white dark:bg-gray-800 p-1 rounded-full text-red-400 hover:text-red-600 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer"
               onClick={handleLogout}
             >
               <span className="sr-only">Logout</span>

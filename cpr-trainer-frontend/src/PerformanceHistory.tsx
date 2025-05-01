@@ -124,7 +124,7 @@ function CPRPerformanceDashboard() {
       const token = document.cookie.split('; ').find(row => row.startsWith('token='));
       console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
       
-      const response = await fetch('api/auth/me', {
+      const response = await fetch('/api/auth/me', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

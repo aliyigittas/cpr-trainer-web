@@ -1,8 +1,7 @@
-import { Route, Routes, useLocation } from 'react-router'
+import { Route, Routes } from 'react-router'
 import LoginPage from './Login'
 import RegisterPage from './Register';
 import CPRPerformanceDashboard from './PerformanceHistory';
-import CPRPerformanceDetailPopup from './PerformanceDetails';
 import ProfilePage from './Profile';
 
 function App() {  

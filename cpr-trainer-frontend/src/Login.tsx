@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LogIn, UserPlus } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
@@ -11,6 +11,8 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [token, setToken] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +38,16 @@ export default function LoginPage() {
       console.log('Token received:', token);
       // Token ile yapılacak işlemleri burada ekleyebilirsin (örneğin, auth context veya localStorage)
       //set token to cookie
-      document.cookie = `token=${token}; path=/;`;
+      // Remember me seçeneğine göre cookie süresini ayarla
+      if (rememberMe) {
+        // 7 gün geçerli olacak cookie
+        const expires = new Date();
+        expires.setDate(expires.getDate() + 7);
+        document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()};`;
+      } else {
+        // Session cookie (tarayıcı kapanınca silinir)
+        document.cookie = `token=${token}; path=/;`;
+      }
       // Redirect to performance history page
       navigate("/performanceHistory");
     } catch (err: unknown) {
@@ -44,6 +55,21 @@ export default function LoginPage() {
       alert('Login failed. Please check your credentials and try again.');
     }
   };
+
+  //if user has logged in already
+  useEffect(() => {
+    //check if token cookie exists
+    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    if (tokenCookie) {
+      const tokenValue = tokenCookie.split('=')[1];
+      setToken(tokenValue);
+      console.log('Token found in cookie:', tokenValue);
+      // Redirect to performance history page
+      navigate("/performanceHistory");
+    } else {
+      console.log('No token found in cookie');
+    }
+  },[])
 
   return (
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300 dark:bg-gray-900 bg-gray-100">
@@ -112,6 +138,8 @@ export default function LoginPage() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
               />
               <label
