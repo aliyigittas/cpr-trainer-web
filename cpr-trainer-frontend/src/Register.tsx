@@ -33,13 +33,14 @@ export default function RegisterPage() {
     // Here you would handle registration logic
     // hash password 
     const hashedPassword = SHA256(formData.password).toString();
-    formData.password = hashedPassword;
+    //formData.password = hashedPassword;
     const now = new Date();
     const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
     // Create new object to send
     const dataToSend = {
       ...formData,
+      password: hashedPassword,
       createdAt: formattedDate,
     };
     const response = await fetch("/api/auth/register", {
@@ -56,7 +57,7 @@ export default function RegisterPage() {
     else {
       console.error("Registration failed");
       const errorData = await response.json();
-      alert("Kayıt başarısız: " + (errorData.message || "Bir hata oluştu."));
+      alert("Unsuccessful registration: " + (errorData.message || "An error occured."));
     }
   };
 

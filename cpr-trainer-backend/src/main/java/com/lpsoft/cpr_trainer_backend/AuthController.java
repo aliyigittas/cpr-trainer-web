@@ -56,10 +56,13 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"Bu email ile zaten bir kullanıcı mevcut.\"}");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This email is already taken.\"}");
+        }
+        else if(userRepository.findByUsername(user.getUsername()).isPresent()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
         userRepository.save(user);
-        return ResponseEntity.ok("Kayıt başarılı");
+        return ResponseEntity.ok("Registration is successful.");
     }
 
     @PostMapping("/login")
@@ -69,7 +72,7 @@ public class AuthController {
             String token = jwtUtil.generateToken(user.getUsername());
             return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Kullanıcı adı veya şifre yanlış");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Username or password is wrong.");
         }
     }
 
