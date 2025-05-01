@@ -3,6 +3,8 @@ import { Eye, EyeOff, Check, X, User } from 'lucide-react';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useNavigate } from 'react-router';
 import cprLogo from './assets/cprLogo.jpg';
+import SHA256 from 'crypto-js/sha256';
+import axios from "axios";
 import TopBar from './TopBar';
 
 const userData = {
@@ -32,28 +34,55 @@ export default function ProfilePage() {
     }, 500);
   };
 
-  const handleChangePassword = (e: React.FormEvent) => {
+  const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setPasswordError('');
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError('All fields are required');
-      return;
-    }
+    
+    // Validate passwords
     if (newPassword !== confirmPassword) {
       setPasswordError('New passwords do not match');
       return;
     }
-    if (newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters');
+    
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters');
       return;
     }
-    setTimeout(() => {
-      setPasswordChanged(true);
+    
+    try {
+      // Hash passwords like in login/register
+      const hashedCurrentPassword = SHA256(currentPassword).toString();
+      const hashedNewPassword = SHA256(newPassword).toString();
+      
+      const response = await axios.post('/api/auth/change-password', {
+        currentPassword: hashedCurrentPassword,
+        newPassword: hashedNewPassword
+      }, {
+        headers: {
+          Authorization: `${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1")}`
+        }
+      });
+      
+      // Clear fields and show success
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      setTimeout(() => setPasswordChanged(false), 3000);
-    }, 500);
+      setPasswordSuccess(true);
+      setPasswordError('');
+      
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        setPasswordSuccess(false);
+      }, 3000);
+      
+    } catch (error: any) {
+      // Handle errors
+      if (error.response && error.response.data) {
+        setPasswordError(error.response.data);
+      } else {
+        setPasswordError('An error occurred. Please try again.');
+      }
+      setPasswordSuccess(false);
+    }
   };
 
   return (
@@ -204,3 +233,7 @@ export default function ProfilePage() {
     </div>
   );
 }
+function setPasswordSuccess(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+

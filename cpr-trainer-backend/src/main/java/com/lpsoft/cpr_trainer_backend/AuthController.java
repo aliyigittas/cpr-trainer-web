@@ -225,4 +225,40 @@ public class AuthController {
         
         return ResponseEntity.ok("Instructor note added successfully.");
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(@RequestHeader("Authorization") String authHeader, 
+                                            @RequestBody Map<String, String> passwordData) {
+        try {
+            // Token'dan kullanıcı bilgisini al
+            ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+            if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
+                return ResponseEntity.status(userInfoResponse.getStatusCode()).body("Unauthorized access");
+            }
+            
+            User user = (User) userInfoResponse.getBody();
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+            
+            // İstek içindeki mevcut ve yeni şifreleri al
+            String currentPassword = passwordData.get("currentPassword");
+            String newPassword = passwordData.get("newPassword");
+            
+            // Mevcut şifreyi doğrula
+            if (!currentPassword.equals(user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Current password is incorrect");
+            }
+            
+            // Şifreyi güncelle
+            user.setPassword(newPassword);
+            userRepository.save(user);
+            
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: " + e.getMessage());
+        }
+    }
+    
 }
