@@ -163,6 +163,24 @@ public class DatabaseAdapter {
         }
     }
 
+    public Boolean updateInstructorNote(int performanceid, String noteType, String note) {
+        try {
+            String updateSql = "UPDATE `cpr`.`performancenotes` SET note = ? " +
+                               "WHERE performanceid = ? AND notetype = ?";
+            int rowsAffected = jdbcTemplate.update(updateSql, note, performanceid, noteType);
+    
+            if (rowsAffected == 0) {
+                System.err.println("⚠️ Güncellenecek not bulunamadı.");
+                return false;
+            }
+    
+            return true;
+        } catch (Exception e) {
+            System.err.println("❌ Not güncellenirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+    
     public Boolean savePositionArray(List<Double> positionArray, int uid){
         int lastPerformanceId = getLastPerformanceByUid(uid);
         try {
