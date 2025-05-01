@@ -206,7 +206,12 @@ public class AuthController {
                 if (!user.getRole().equals("instructor")) {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only instructors can add notes.");
                 }
-                databaseAdapter.saveInstructorNote(Integer.parseInt(performanceid), notetype, note);
+                if(performanceNotesRepository.findByPerformanceidAndType(Integer.parseInt(performanceid), notetype).isEmpty()){ //if the is no instructor note added 
+                    databaseAdapter.saveInstructorNote(Integer.parseInt(performanceid), notetype, note);
+                }
+                else{
+                    databaseAdapter.updateInstructorNote(Integer.parseInt(performanceid), notetype, note);
+                }
                 //TODO: create dump to database
             }
             
