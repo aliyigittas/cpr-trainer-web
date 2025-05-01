@@ -163,6 +163,11 @@ function CPRPerformanceDashboard() {
         const user = await response.json();
         setUserData(user);
         console.log("User data retrieved:", user);
+        //if user is admin, redirect to admin page
+        if (user.role === 'admin') {
+          console.log("User is admin, redirecting to admin page");
+          navigate('/adminPanel');
+        }
       } else {
         console.error("Failed to fetch user data");
       }

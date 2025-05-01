@@ -11,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +25,7 @@ import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceNotesRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PositionDetailsRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
+
 
 
 
@@ -135,6 +138,59 @@ public class AuthController {
             return ResponseEntity.ok(user);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the token.");
+        }
+    }
+
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<List<User>> getAllUsers(@RequestHeader("Authorization") String authHeader) {
+        // Kullanıcı bilgilerini al
+        ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+        if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(userInfoResponse.getStatusCode()).body(Collections.emptyList());
+        }
+        User user = (User) userInfoResponse.getBody();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
+        }
+        // Kullanıcı bilgilerini al
+        System.out.println("User found: " + user.getUsername());
+        // Eğer kullanıcı admin değilse, yetkisiz erişim hatası döndür
+        if (!user.getRole().equals("admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
+        }
+        List<User> users = userRepository.findAll();
+        System.out.println("Number of users retrieved: " + users.size());
+        return ResponseEntity.ok(users);
+    }
+    
+    @PutMapping("changeUserRole/{id}")
+    public ResponseEntity<String> changeUserRole(@RequestHeader("Authorization") String authHeader, @PathVariable int id, @RequestBody Map<String, String> body) {
+        // Kullanıcı bilgilerini al
+        ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+        if (userInfoResponse.getStatusCode() != HttpStatus.OK) {
+            return ResponseEntity.status(userInfoResponse.getStatusCode()).body("Unauthorized access");
+        }
+        User user = (User) userInfoResponse.getBody();
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+        // Kullanıcı bilgilerini al
+        System.out.println("User found: " + user.getUsername());
+        // Eğer kullanıcı admin değilse, yetkisiz erişim hatası döndür
+        if (!user.getRole().equals("admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access");
+        }
+        
+        String newRole = body.get("role");
+        Optional<User> userToUpdate = userRepository.findById(id);
+        
+        if (userToUpdate.isPresent()) {
+            User userToUpdateObj = userToUpdate.get();
+            userToUpdateObj.setRole(newRole);
+            userRepository.save(userToUpdateObj);
+            return ResponseEntity.ok("User role updated successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
     }
 

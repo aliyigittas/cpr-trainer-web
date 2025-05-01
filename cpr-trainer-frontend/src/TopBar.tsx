@@ -58,13 +58,15 @@ function TopBar() {
             <ThemeToggle />
 
             {/* Profile */}
-            <button
-              className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-              onClick={() => safeNavigate("/profile")}
-            >
-              <span className="sr-only">View profile</span>
-              <User className="h-6 w-6" />
-            </button>
+            {window.location.pathname !== "/adminPanel" && (
+              <button
+                className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                onClick={() => safeNavigate("/profile")}
+              >
+                <span className="sr-only">View profile</span>
+                <User className="h-6 w-6" />
+              </button>
+            )}
 
             {/* Logout */}
             <button

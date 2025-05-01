@@ -3,6 +3,7 @@ import LoginPage from './Login'
 import RegisterPage from './Register';
 import CPRPerformanceDashboard from './PerformanceHistory';
 import ProfilePage from './Profile';
+import AdminPanel from './AdminPanel';
 
 function App() {  
   return (
@@ -12,6 +13,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/performanceHistory/:id?" element={<CPRPerformanceDashboard />} />
       <Route path="/profile" element = {<ProfilePage/>}/>
+      <Route path="/adminPanel" element={<AdminPanel />} />
     </Routes>
   );
 }

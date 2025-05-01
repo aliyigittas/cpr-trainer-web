@@ -59,6 +59,11 @@ export default function ProfilePage() {
 
         if (response.ok) {
           const data = await response.json();
+          //if user is not admin, redirect to performance history
+          if (data.role === 'admin') {
+            navigate('/adminPanel');
+            return;
+          }
           setUserData(data);
           setNewUsername(data.username);
         } else {
