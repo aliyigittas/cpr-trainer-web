@@ -24,7 +24,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
     async function getPerformanceNote(){
       const token = document.cookie.split('; ').find(row => row.startsWith('token='));
       const performanceData = performance;
-      const performanceNotesResponse = await fetch(`api/auth/getPerformanceNotes?param=${performanceData.id}`, {
+      const performanceNotesResponse = await fetch(`/api/auth/getPerformanceNotes?param=${performanceData.id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

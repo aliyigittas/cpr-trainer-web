@@ -14,8 +14,8 @@ function TopBar() {
   };
 
   const handleLogout = () => {
-    // Clear localStorage/sessionStorage/token if used
-    // localStorage.removeItem("token");
+    // Expire token
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     // Redirect to login page
     navigate("/login");
   };

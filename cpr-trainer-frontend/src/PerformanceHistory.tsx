@@ -4,12 +4,18 @@ import Performance from './types/Performance';
 import CPRPerformanceDetailPopup from './PerformanceDetails';
 import TopBar from './TopBar';
 import User from './types/User';
+import { useNavigate } from 'react-router';
+import { useParams } from 'react-router-dom';
+
 
 // TypeScript interfaces
 type FeedbackType = 'A' | 'H' | 'V';
 
-// Main component
+// not mandatory field id
 function CPRPerformanceDashboard() {
+  const { id } = useParams<{ id?: string }>();
+  const numericId = id ? parseInt(id, 10) : undefined;
+
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [showPopup, setShowPopup] = useState(false);
@@ -30,6 +36,7 @@ function CPRPerformanceDashboard() {
       createdAt: "",
     }
   );
+  const navigate = useNavigate();
 
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
@@ -63,6 +70,8 @@ function CPRPerformanceDashboard() {
     setFreqData(newFreqData);
     setPositionData(newPositionData);
     setShowPopup(true);
+    // URL'yi güncelle (sayfa yenilenmez)
+    navigate(`/performanceHistory/${performance.id}`, { replace: true });
   };
 
   const formatTrainingTime = (seconds: number): string => {
@@ -130,6 +139,14 @@ function CPRPerformanceDashboard() {
       } else {
         console.error("Failed to fetch user data");
       }
+
+      if (response.status === 401 || response.status === 403) {
+        console.error("Unauthorized access. Please log in again.");
+        // Optionally, redirect to login page or show a message
+        navigate('/login');
+        //remove token from cookie
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      }
     }
     getUserInfo();
   }, []);
@@ -140,7 +157,7 @@ function CPRPerformanceDashboard() {
       const token = document.cookie.split('; ').find(row => row.startsWith('token='));
       console.log("Token retrieved:", token ? token.split('=')[1] : "No token found");
       
-      const response = await fetch('api/auth/getPerformance', {
+      const response = await fetch('/api/auth/getPerformance', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -152,6 +169,16 @@ function CPRPerformanceDashboard() {
         const performanceData = await response.json();
         setPerformances(performanceData);
         console.log("Performance data retrieved:", performanceData);
+        // If an ID is provided, filter the performance data
+        if (numericId) {
+          console.log("Filtering performance data for ID:", numericId);
+          const filteredPerformance = performanceData.find((performance: Performance) => performance.id === numericId);
+          if (filteredPerformance) {
+            handleViewDetails(filteredPerformance);
+          } else {
+            console.error("Performance not found");
+          }
+        }
         
         
       } else {
@@ -371,7 +398,12 @@ function CPRPerformanceDashboard() {
           freqData={freqData}
           positionData={positionData}
           role={userData.role}
-          onClose={() => setShowPopup(false)}
+          onClose={() => {
+            setShowPopup(false);
+            // URL'yi güncelle (sayfa yenilenmez)
+            navigate(`/performanceHistory`, { replace: true });
+          }
+          }
         />
       )}
     </div>
