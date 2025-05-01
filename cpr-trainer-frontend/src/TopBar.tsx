@@ -13,11 +13,27 @@ function TopBar() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     // Expire token
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    // Redirect to login page
-    navigate("/login");
+    const response = await fetch("/api/auth/logout", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("token="))
+          ?.split("=")[1]}`,
+      },
+    });
+    if (response.ok) {
+      // Clear token from cookies
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      // Redirect to login page
+      navigate("/login");
+    } else {
+      console.error("Logout failed");
+      alert("Logout failed. Please try again.");
+    }
   };
 
   return (

@@ -53,6 +53,9 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private TokenBlacklistService tokenBlacklistService;
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
@@ -76,6 +79,14 @@ public class AuthController {
         }
     }
 
+    
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "").trim();
+        tokenBlacklistService.blacklistToken(token);
+        return ResponseEntity.ok("Logout successful.");
+    }
+
     // Kullanıcı bilgilerini dönecek /auth/me endpoint'i
     @GetMapping("/me")
     public ResponseEntity<Object> getUserInfo(@RequestHeader("Authorization") String authHeader) {
@@ -85,9 +96,12 @@ public class AuthController {
                 System.out.println("Authorization header is missing or invalid.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Missing or invalid Authorization header.");
             }
-
             // Token'ı header'dan al
             String token = authHeader.substring(7); // "Bearer " kısmını çıkartıyoruz
+
+            if (tokenBlacklistService.isTokenBlacklisted(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token is deactivated.");
+            }
 
             // Token'ı doğrula
             String username = jwtUtil.extractUsername(token);

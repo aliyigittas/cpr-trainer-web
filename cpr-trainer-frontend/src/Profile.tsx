@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Eye, EyeOff, Check, X, User, Edit2, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import cprLogo from './assets/cprLogo.jpg';
 import SHA256 from 'crypto-js/sha256';
 import axios from "axios";
 import TopBar from './TopBar';
@@ -217,7 +216,7 @@ export default function ProfilePage() {
                       <button
                         type="button"
                         onClick={handleUpdateUsername}
-                        className="p-1 text-blue-500 hover:text-blue-700"
+                        className="p-1 text-blue-500 hover:text-blue-700 cursor-pointer"
                       >
                         <Save size={18} />
                       </button>
@@ -228,7 +227,7 @@ export default function ProfilePage() {
                           setNewUsername(userData.username);
                           setUsernameError('');
                         }}
-                        className="p-1 text-red-500 hover:text-red-700"
+                        className="p-1 text-red-500 hover:text-red-700 cursor-pointer"
                       >
                         <X size={18} />
                       </button>
@@ -242,7 +241,7 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       onClick={() => setEditingUsername(true)}
-                      className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      className="ml-2 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 cursor-pointer"
                     >
                       <Edit2 size={18} />
                     </button>
@@ -307,7 +306,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-5 cursor-pointer"
               >
                 {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -324,7 +323,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-5 cursor-pointer"
               >
                 {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -341,7 +340,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 mt-5 cursor-pointer"
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -349,7 +348,7 @@ export default function ProfilePage() {
 
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
             >
               Update Password
             </button>
