@@ -4,6 +4,7 @@ import RegisterPage from './Register';
 import CPRPerformanceDashboard from './PerformanceHistory';
 import ProfilePage from './Profile';
 import AdminPanel from './AdminPanel';
+import NotFound from './NotFound';
 
 function App() {  
   return (
@@ -14,6 +15,7 @@ function App() {
       <Route path="/performanceHistory/:id?" element={<CPRPerformanceDashboard />} />
       <Route path="/profile" element = {<ProfilePage/>}/>
       <Route path="/adminPanel" element={<AdminPanel />} />
+      <Route path="*" element={<NotFound />} /> {/* Added NotFound route */}
     </Routes>
   );
 }

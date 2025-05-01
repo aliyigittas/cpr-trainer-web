@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogIn, Save } from "lucide-react";
+import { Eye, EyeOff, LogIn, Save } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
 import { SHA256 } from "crypto-js";
@@ -7,6 +7,7 @@ import { SHA256 } from "crypto-js";
 // Registration Page Component
 export default function RegisterPage() {
   const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     firstname: "",
@@ -17,7 +18,9 @@ export default function RegisterPage() {
     khasID: "",
     role: "user", // default role
   });
-    const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -200,17 +203,24 @@ export default function RegisterPage() {
               >
                 Password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={formData.password}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
                   placeholder="Create a password"
                 />
+                <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
               </div>
             </div>
 
@@ -221,17 +231,24 @@ export default function RegisterPage() {
               >
                 Confirm Password
               </label>
-              <div className="mt-1">
+              <div className="mt-1 relative">
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
                   placeholder="Confirm your password"
                 />
+                <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
               </div>
             </div>
 

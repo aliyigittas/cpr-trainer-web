@@ -106,6 +106,7 @@ function CPRPerformanceDashboard() {
   };
 
   const fetchUsernames = async (performances: Performance[]) => {
+    if(userData.role !== "instructor") return;
     const uniqueIds = [...new Set(performances.map((p) => p.uid))];
 
     const userMap: { [key: number]: string } = {};

@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { LogIn, UserPlus } from "lucide-react";
+import { Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { useNavigate } from "react-router";
 import axios, { AxiosError } from "axios";
-import SHA256 from 'crypto-js/sha256';
+import SHA256 from "crypto-js/sha256";
 // Login Page Component
 export default function LoginPage() {
   //use react navigation to redirect to register page
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +23,7 @@ export default function LoginPage() {
       // Backend'e POST isteği yapıyoruz
       // Şifreyi SHA256 ile hash'liyoruz
       const hashedPassword = SHA256(password).toString();
-      const response = await axios.post('api/auth/login', {
+      const response = await axios.post("api/auth/login", {
         username: username,
         password: hashedPassword,
         khasID: username,
@@ -36,12 +36,9 @@ export default function LoginPage() {
       // Token'ı state'e kaydediyoruz
       setToken(response.data.token);
 
-      console.log('Token received:', token);
-      // Token ile yapılacak işlemleri burada ekleyebilirsin (örneğin, auth context veya localStorage)
-      //set token to cookie
-      // Remember me seçeneğine göre cookie süresini ayarla
+      console.log("Token received:", token);
+
       if (rememberMe) {
-        // 7 gün geçerli olacak cookie
         const expires = new Date();
         expires.setDate(expires.getDate() + 7);
         document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()};`;
@@ -52,25 +49,27 @@ export default function LoginPage() {
       // Redirect to performance history page
       navigate("/performanceHistory");
     } catch (err: unknown) {
-      console.error('Login failed:', (err as AxiosError).message);
-      alert('Login failed. Please check your credentials and try again.');
+      console.error("Login failed:", (err as AxiosError).message);
+      alert("Login failed. Please check your credentials and try again.");
     }
   };
 
   //if user has logged in already
   useEffect(() => {
     //check if token cookie exists
-    const tokenCookie = document.cookie.split('; ').find(row => row.startsWith('token='));
+    const tokenCookie = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="));
     if (tokenCookie) {
-      const tokenValue = tokenCookie.split('=')[1];
+      const tokenValue = tokenCookie.split("=")[1];
       setToken(tokenValue);
-      console.log('Token found in cookie:', tokenValue);
+      console.log("Token found in cookie:", tokenValue);
       // Redirect to performance history page
       navigate("/performanceHistory");
     } else {
-      console.log('No token found in cookie');
+      console.log("No token found in cookie");
     }
-  },[])
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300 dark:bg-gray-900 bg-gray-100">
@@ -118,17 +117,26 @@ export default function LoginPage() {
                 Password
               </label>
               <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="on"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
-                  placeholder="Enter your password"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="on"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-colors"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
