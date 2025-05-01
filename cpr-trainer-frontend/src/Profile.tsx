@@ -132,10 +132,22 @@ export default function ProfilePage() {
       return;
     }
     
+    // Check if new password is the same as current password
+    if (newPassword === currentPassword) {
+      setPasswordError('New password must be different from your current password');
+      return;
+    }
+    
     try {
       // Hash passwords like in login/register
       const hashedCurrentPassword = SHA256(currentPassword).toString();
       const hashedNewPassword = SHA256(newPassword).toString();
+      
+      // Check if the hashed values are the same (additional check)
+      if (hashedNewPassword === hashedCurrentPassword) {
+        setPasswordError('New password must be different from your current password');
+        return;
+      }
       
       const response = await axios.post('/api/auth/change-password', {
         currentPassword: hashedCurrentPassword,
