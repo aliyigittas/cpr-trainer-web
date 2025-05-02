@@ -13,6 +13,7 @@ import User from "./types/User";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
 import PerformanceNote from "./types/PerformanceNote";
+import PerformanceScorePopup from "./ProgressReport";
 
 // TypeScript interfaces
 type FeedbackType = "A" | "H" | "V";
@@ -24,6 +25,7 @@ function CPRPerformanceDashboard() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [showPopup, setShowPopup] = useState(false);
+  const [showProgressPopup, setShowProgressPopup] = useState(false);
   const [selectedPerformance, setSelectedPerformance] =
     useState<Performance | null>(null);
   const [depthData, setDepthData] = useState<
@@ -127,6 +129,12 @@ function CPRPerformanceDashboard() {
     setShowPopup(true);
     // URL'yi güncelle (sayfa yenilenmez)
     navigate(`/performanceHistory/${performance.id}`, { replace: true });
+  };
+
+  const handleViewProgress = (performances: Performance[]) => {
+    setShowProgressPopup(true);
+    navigate(`/performanceHistory/scoreProgress`, { replace: true });
+
   };
 
   const formatTrainingTime = (seconds: number): string => {
@@ -586,7 +594,14 @@ function CPRPerformanceDashboard() {
                 </div>
               )}
             </div>
-
+            <div className="mt-4 flex justify-end">
+              <button
+                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                onClick={() => handleViewProgress(performances)}
+              >
+                View Details
+              </button>
+            </div>
 
           </div>
         </div>
@@ -720,6 +735,17 @@ function CPRPerformanceDashboard() {
             // URL'yi güncelle (sayfa yenilenmez)
             navigate(`/performanceHistory`, { replace: true });
           }}
+        />
+      )}
+
+      {/*Performance Progress Popup */}
+      {showProgressPopup && performances &&(
+        <PerformanceScorePopup
+        performance={performances}
+        onClose={() => {
+          setShowProgressPopup(false);
+          navigate(`/performanceHistory`, { replace: true });
+        }}
         />
       )}
     </div>
