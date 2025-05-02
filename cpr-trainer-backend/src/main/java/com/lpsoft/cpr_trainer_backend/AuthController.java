@@ -213,7 +213,7 @@ public class AuthController {
             // Performansları al
             int uid = user.getId();
             if (user.getRole().equals("instructor")) {
-                performances = performanceRepository.findAll();
+                performances = performanceRepository.findAllByStatus(1);
             } else {
                 performances = performanceRepository.findByUidAndStatus(uid, 1);
             }

@@ -127,8 +127,8 @@ export default function ProfilePage() {
     try {
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
-      const response = await fetch(`/auth/deleteAccount?uid=${uid}`, {
-        method: 'GET', // note: still using GET here, even though your controller expects POST
+      const response = await fetch(`/api/auth/deleteAccount?uid=${uid}`, {
+        method: 'POST', // note: still using GET here, even though your controller expects POST
         headers: {
           'Authorization': token
         }
@@ -139,6 +139,7 @@ export default function ProfilePage() {
       if (response.ok) {
         console.log("Account deleted successfully:", result);
         alert("Your account has been deactivated.");
+        navigate('/login');
       } else {
         console.error("Failed to delete account:", result);
         alert("Failed to delete account: " + result);
