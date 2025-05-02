@@ -34,7 +34,7 @@ public class DatabaseAdapter {
                          "uid, feedbackType, meanDepth, meanFreq, stdDepth, stdFreq, " +
                          "highDepthCount, highFreqCount, lowDepthCount, lowFreqCount, " +
                          "totalCompression, score, trainingTime, performanceDate" +
-                         ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                         "status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
             jdbcTemplate.update(sql,
                 performance.getUid(),
@@ -50,7 +50,8 @@ public class DatabaseAdapter {
                 performance.getTotalCompression(),
                 performance.getScore(),
                 performance.getTrainingTime(),
-                performance.getPerformanceDate()
+                performance.getPerformanceDate(),
+                1
             );
             
             return true;

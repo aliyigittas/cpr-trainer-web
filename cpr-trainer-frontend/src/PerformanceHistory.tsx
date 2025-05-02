@@ -344,6 +344,7 @@ function CPRPerformanceDashboard() {
         setIsLoading(false);
       } else {
         console.error("Failed to fetch performance data");
+        setIsLoading(false);
       }
     }
     fetchPerformances();

@@ -61,6 +61,7 @@ export default function RegisterPage() {
       ...formData,
       password: hashedPassword,
       createdAt: formattedDate,
+      status: 1,
     };
     const response = await fetch("/api/auth/register", {
       method: "POST",

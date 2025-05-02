@@ -67,7 +67,7 @@ public class AuthController {
         else if(userRepository.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
-        else if(userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
+        else if(user.getKhasID() != "" && userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This khas id is already taken.\"}");
         }
         userRepository.save(user);
