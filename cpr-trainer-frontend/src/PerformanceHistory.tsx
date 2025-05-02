@@ -12,10 +12,10 @@ import TopBar from "./TopBar";
 import User from "./types/User";
 import { useNavigate } from "react-router";
 import { useParams } from "react-router-dom";
+import PerformanceNote from "./types/PerformanceNote";
 
 // TypeScript interfaces
 type FeedbackType = "A" | "H" | "V";
-
 // not mandatory field id
 function CPRPerformanceDashboard() {
   const { id } = useParams<{ id?: string }>();
@@ -48,15 +48,47 @@ function CPRPerformanceDashboard() {
   });
   const navigate = useNavigate();
 
-  const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
-  const [selectedTypes, setSelectedTypes] = useState<FeedbackType[]>([]);
-  const filterRef = useRef<HTMLDivElement | null>(null);
+  const [isTypeFilterOpen, setIsTypeFilterOpen] = useState<boolean>(false);
+  const [selectedFeedbackTypes, setSelectedFeedbackTypes] = useState<FeedbackType[]>([]);
+  const typeFilterRef = useRef<HTMLDivElement | null>(null);
   const [usernames, setUsernames] = useState<{ [key: number]: string }>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
+  const [performanceNotesMap, setPerformanceNotesMap] = useState<{ [key: number]: boolean }>({});
+  const [selectedNoteStatuses, setSelectedNoteStatuses] = useState<string[]>([]);
+  const [isNoteFilterOpen, setIsNoteFilterOpen] = useState(false);
+  const noteFilterRef = useRef<HTMLDivElement | null>(null);
+  const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
+  const [instructorNote, setInstructorNote] = useState<string[]>([]);
+  
   // Select all feedback types
-  const selectAllTypes = (): void => {
-    setSelectedTypes(["A", "H", "V"]);
+  const selectAllFeedbackTypes = (): void => {
+    setSelectedFeedbackTypes(["A", "H", "V"]);
+  };
+
+  const toggleNoteStatus = (status: "noted" | "not-noted") => {
+    if (selectedNoteStatuses.includes(status)) {
+      setSelectedNoteStatuses(selectedNoteStatuses.filter((s) => s !== status));
+    } else {
+      setSelectedNoteStatuses([...selectedNoteStatuses, status]);
+    }
+  };
+  
+  const selectAllNoteStatuses = () => {
+    setSelectedNoteStatuses(["noted", "not-noted"]);
+  };
+  
+  const clearNoteFilters = () => {
+    setSelectedNoteStatuses([]);
+  };
+  
+  const getNoteFilterLabel = () => {
+    if (selectedNoteStatuses.length === 0 || selectedNoteStatuses.length === 2) {
+      return "All Notes";
+    } else if (selectedNoteStatuses.includes("noted")) {
+      return "Noted Only";
+    } else {
+      return "Not Noted";
+    }
   };
 
   // Handle viewing performance details
@@ -138,18 +170,24 @@ function CPRPerformanceDashboard() {
   };
 
   // Toggle the filter dropdown
-  const toggleFilterDropdown = (): void => {
-    setIsFilterOpen(!isFilterOpen);
+  const toggleFeedackFilterDropdown = (): void => {
+    setIsTypeFilterOpen(!isTypeFilterOpen);
   };
 
   // Handle clicks outside to close the dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent): void {
       if (
-        filterRef.current &&
-        !filterRef.current.contains(event.target as Node)
+        typeFilterRef.current &&
+        !typeFilterRef.current.contains(event.target as Node)
       ) {
-        setIsFilterOpen(false);
+        setIsTypeFilterOpen(false);
+      }
+      if (
+        noteFilterRef.current &&
+        !noteFilterRef.current.contains(event.target as Node)
+      ) {
+        setIsNoteFilterOpen(false);
       }
     }
 
@@ -157,22 +195,23 @@ function CPRPerformanceDashboard() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [filterRef]);
+  }, [typeFilterRef, noteFilterRef]);
 
   // Toggle selection of a feedback type
   const toggleFeedbackType = (type: FeedbackType): void => {
-    if (selectedTypes.includes(type)) {
-      setSelectedTypes(selectedTypes.filter((item) => item !== type));
+    if (selectedFeedbackTypes.includes(type)) {
+      setSelectedFeedbackTypes(selectedFeedbackTypes.filter((item) => item !== type));
     } else {
-      setSelectedTypes([...selectedTypes, type]);
+      setSelectedFeedbackTypes([...selectedFeedbackTypes, type]);
     }
   };
 
+
   // Format the selected types for display
   const getDisplayText = (): string => {
-    if (selectedTypes.length === 0) return "All Types";
-    if (selectedTypes.length === 3) return "All Types";
-    return selectedTypes.join("-");
+    if (selectedFeedbackTypes.length === 0) return "All Types";
+    if (selectedFeedbackTypes.length === 3) return "All Types";
+    return selectedFeedbackTypes.join("-");
   };
 
   // Fetch user info
@@ -247,6 +286,47 @@ function CPRPerformanceDashboard() {
       if (response.ok) {
         const performanceData = await response.json();
         setPerformances(performanceData);
+        const notesMap: { [key: number]: boolean } = {};
+        await Promise.all(
+          performanceData.map(async (perf: Performance) => {
+            const token = document.cookie.split('; ').find(row => row.startsWith('token='));
+            const response = await fetch(`/api/auth/getPerformanceNotes?param=${perf.id}`, {
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `${token ? token.split('=')[1] : ''}`
+              }
+            });
+
+            if (response.ok) {
+              const notes = await response.json();
+              const instructorNoteArray: string[] = [];
+              const aiNotesArray: PerformanceNote[] = [];
+            
+              notes.forEach((noteObj: {
+                id: number;
+                performanceid: number;
+                notetype: string;
+                note: string;
+              }) => {
+                if (noteObj.notetype === 'H') {
+                  instructorNoteArray.push(noteObj.note);
+                } else if (noteObj.notetype === 'A') {
+                  const parsedNotes: PerformanceNote[] = noteObj.note ? JSON.parse(noteObj.note) : [];
+                  aiNotesArray.push(...parsedNotes);
+                }
+              });
+            
+              notesMap[perf.id] = notes.some((n: any) => n.notetype === 'H');
+            } else {
+              notesMap[perf.id] = false;
+            }
+          })
+        );
+        setPerformanceNotesMap(notesMap);
+        setAiNotes(aiNotes);
+        setInstructorNote(instructorNote);
+        console.log("Notes map:", notesMap);
+
         console.log("Performance data retrieved:", performanceData);
         // If an ID is provided, filter the performance data
         if (numericId) {
@@ -291,13 +371,24 @@ function CPRPerformanceDashboard() {
   };
 
   // Filter performances based on selected feedback types
-  const filteredPerformances =
-    selectedTypes.length === 0
-      ? performances
-      : performances.filter((perf) => {
-          // Check if the performance's feedback type contains any of the selected types
-          return selectedTypes.some((type) => perf.feedbackType.includes(type));
-        });
+  const filteredPerformances = performances.filter((perf) => {
+    // feedback type match
+    const feedbackMatch =
+      selectedFeedbackTypes.length === 0 ||
+      selectedFeedbackTypes.some((type) => perf.feedbackType.includes(type));
+  
+    // note status match
+    const hasNote = performanceNotesMap[perf.id] ?? false;
+  
+    const noteMatch =
+      selectedNoteStatuses.length === 0 || // no filter
+      selectedNoteStatuses.length === 2 || // both filters = all
+      (selectedNoteStatuses.includes("noted") && hasNote) ||
+      (selectedNoteStatuses.includes("not-noted") && !hasNote);
+  
+    return feedbackMatch && noteMatch;
+  });
+  
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -349,21 +440,21 @@ function CPRPerformanceDashboard() {
               </button>
             </div>
 
-            <div className="relative" ref={filterRef}>
+            <div className="relative" ref={typeFilterRef}>
               <button
-                onClick={toggleFilterDropdown}
+                onClick={toggleFeedackFilterDropdown}
                 className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
               >
                 <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
                 Filter: {getDisplayText()}
                 <ChevronDown
                   className={`ml-1 h-4 w-4 transform ${
-                    isFilterOpen ? "rotate-180" : ""
+                    isTypeFilterOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>
 
-              {isFilterOpen && (
+              {isTypeFilterOpen && (
                 <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
                   <div className="py-1">
                     <div className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -373,8 +464,8 @@ function CPRPerformanceDashboard() {
                       <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedTypes.length === 3}
-                          onChange={selectAllTypes}
+                          checked={selectedFeedbackTypes.length === 3}
+                          onChange={selectAllFeedbackTypes}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
                         <span className="font-medium">All Types</span>
@@ -386,7 +477,7 @@ function CPRPerformanceDashboard() {
                       <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedTypes.includes("A")}
+                          checked={selectedFeedbackTypes.includes("A")}
                           onChange={() => toggleFeedbackType("A")}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
@@ -397,7 +488,7 @@ function CPRPerformanceDashboard() {
                       <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedTypes.includes("H")}
+                          checked={selectedFeedbackTypes.includes("H")}
                           onChange={() => toggleFeedbackType("H")}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
@@ -408,7 +499,7 @@ function CPRPerformanceDashboard() {
                       <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedTypes.includes("V")}
+                          checked={selectedFeedbackTypes.includes("V")}
                           onChange={() => toggleFeedbackType("V")}
                           className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                         />
@@ -418,7 +509,7 @@ function CPRPerformanceDashboard() {
                   </div>
                   <div className="py-1">
                     <button
-                      onClick={() => setSelectedTypes([])}
+                      onClick={() => setSelectedFeedbackTypes([])}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                     >
                       Clear filters
@@ -427,6 +518,74 @@ function CPRPerformanceDashboard() {
                 </div>
               )}
             </div>
+
+            <div className="relative" ref={noteFilterRef}>
+              <button
+                onClick={() => setIsNoteFilterOpen(!isNoteFilterOpen)}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+              >
+                <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                Filter: {getNoteFilterLabel()}
+                <ChevronDown
+                  className={`ml-1 h-4 w-4 transform ${isNoteFilterOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {isNoteFilterOpen && (
+                <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
+                  <div className="py-1">
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedNoteStatuses.length === 2}
+                          onChange={selectAllNoteStatuses}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="font-medium">All Notes</span>
+                      </label>
+                    </div>
+
+                    <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
+
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedNoteStatuses.includes("noted")}
+                          onChange={() => toggleNoteStatus("noted")}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        Noted Only
+                      </label>
+                    </div>
+
+                    <div className="px-4 py-1">
+                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedNoteStatuses.includes("not-noted")}
+                          onChange={() => toggleNoteStatus("not-noted")}
+                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        Not Noted
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="py-1">
+                    <button
+                      onClick={clearNoteFilters}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    >
+                      Clear filters
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+
           </div>
         </div>
 

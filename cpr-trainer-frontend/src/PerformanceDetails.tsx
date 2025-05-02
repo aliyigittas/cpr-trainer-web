@@ -96,7 +96,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
   const handleSaveInstructorNote = async (note: string) => {
     const token = document.cookie.split('; ').find(row => row.startsWith('token='));
     const performanceData = performance;
-    const response = await fetch(`api/auth/saveInstructorNote`, {
+    const response = await fetch(`/api/auth/saveInstructorNote`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,6 +122,8 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
   const IDEAL_MAX_FREQ = 120;
   const IDEAL_MIN_DEPTH = 50;
   const IDEAL_MAX_DEPTH = 60;  
+  const IDEAL_MIN_SCORE = 90;
+  const IDEAL_MAX_SCORE = 100;
 
   return (
     <div className="fixed inset-0 bg-black/40 bg-opacity-30 flex justify-center items-start pt-24 z-50 overflow-y-auto">
@@ -479,7 +481,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
               {/*Position Chart - Per Compression*/}
               <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Position by Compression
+                  Position Score by Compression
                 </h4>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -496,21 +498,46 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
                       <YAxis
                         stroke="#9CA3AF"
                         label={{ value: 'Position Score', angle: -90, position: 'insideLeft', offset: 10 }}
-                        domain={[
-                          Math.min(...positionData.map(d => d.position)),
-                          Math.max(...positionData.map(d => d.position))
-                        ]}
+                        domain={[Math.min(IDEAL_MIN_SCORE - 10, Math.min(...(performance.positionArray.length ? performance.positionArray : [IDEAL_MIN_SCORE - 10]))), Math.max(IDEAL_MAX_SCORE, Math.max(...(performance.positionArray.length ? performance.positionArray : [IDEAL_MAX_SCORE + 10])))]}
+
                       />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1F2937', borderColor: '#374151', color: '#F9FAFB' }}
-                        formatter={(value: string) => [`${value} point`, 'Position']}
+                        formatter={(value: string) => [`${value} point`, 'Position Score']}
                         labelFormatter={(label: string) => `Compression #${label}`}
                       />
                       <Legend verticalAlign="top" height={36} />
+                      <ReferenceArea 
+                        y1={IDEAL_MIN_SCORE} 
+                        y2={IDEAL_MAX_SCORE} 
+                        strokeOpacity={0} 
+                        fill="green" 
+                        fillOpacity={0.2}
+                      />
+                      <ReferenceLine 
+                        y={IDEAL_MAX_SCORE} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Upper Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
+                      <ReferenceLine 
+                        y={IDEAL_MIN_SCORE} 
+                        stroke="#9CA3AF" 
+                        strokeDasharray="3 3" 
+                        label={{ 
+                          value: 'Lower Target', 
+                          position: 'right', 
+                          style: { fill: '#9CA3AF', fontSize: 10 } 
+                        }} 
+                      />
                       <Line
                         type="monotone"
                         dataKey="position"
-                        name="Position"
+                        name="Position Score"
                         stroke="#3B82F6"
                         strokeWidth={2}
                         dot={false}
