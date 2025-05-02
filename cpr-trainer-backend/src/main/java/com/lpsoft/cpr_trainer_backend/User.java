@@ -29,6 +29,8 @@ public class User {
     private String role;
 
     private String createdAt;
+
+    private int status;
  
     // Constructor
 
@@ -36,7 +38,7 @@ public class User {
  
     // Full Constructor
 
-    public User(int id, String firstname, String surname, String username, String email, String password, String khasID, String role, String createdAt) {
+    public User(int id, String firstname, String surname, String username, String email, String password, String khasID, String role, String createdAt, int status) {
 
         this.id = id;
 
@@ -55,6 +57,8 @@ public class User {
         this.role = role;
 
         this.createdAt = createdAt;
+
+        this.status = status;
 
     }
  
@@ -96,6 +100,9 @@ public class User {
 
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 
+    public int getStatus() {return status;}
+
+    public void setStatus(int status) {this.status = status;}
 }
 
  

@@ -16,7 +16,8 @@ type Performance = {
     performanceDate: string;
     depthArray: [];
     freqArray: [];
-    positionArray: []
+    positionArray: [];
+    status: number;
 };
 
 export default Performance;

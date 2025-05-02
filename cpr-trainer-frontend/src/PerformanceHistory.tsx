@@ -45,6 +45,7 @@ function CPRPerformanceDashboard() {
     khasID: "",
     role: "",
     createdAt: "",
+    status: 0,
   });
   const navigate = useNavigate();
 

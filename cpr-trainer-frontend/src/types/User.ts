@@ -8,6 +8,7 @@ type User = {
   khasID: string;
   role: string;
   createdAt: string;
+  status: number;
 };
 
 export default User;

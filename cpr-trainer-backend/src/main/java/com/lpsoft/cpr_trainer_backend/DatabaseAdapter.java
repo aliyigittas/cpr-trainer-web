@@ -199,5 +199,18 @@ public class DatabaseAdapter {
         }
     }
     
+    public Boolean deactivateUser(int uid){
+        String sql = "UPDATE `cpr`.`users` SET status = 0 WHERE uid = ?";
+        int rowsAffected = jdbcTemplate.update(sql, uid);
+        System.out.println("rows:"+ rowsAffected);
+        return rowsAffected > 0;
+    }
+
+    public Boolean deactivatePerformances(int uid){
+        String sql = "UPDATE `cpr`.`performances` SET status = 0 WHERE uid = ?";
+        int rowsAffected = jdbcTemplate.update(sql, uid);
+        System.out.println("rows:"+ rowsAffected);
+        return rowsAffected > 0;
+    }
 
 }

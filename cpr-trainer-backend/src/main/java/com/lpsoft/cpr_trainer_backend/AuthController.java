@@ -64,10 +64,10 @@ public class AuthController {
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This email is already taken.\"}");
         }
-        else if(userRepository.findByUsername(user.getUsername()).isPresent()){
+        else if(userRepository.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
-        else if(userRepository.findByKhasID(user.getKhasID()).isPresent()){
+        else if(userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This khas id is already taken.\"}");
         }
         userRepository.save(user);
@@ -76,8 +76,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        Optional<User> dbUser = userRepository.findByUsername(user.getUsername());
-        Optional<User> dbUserKhas = userRepository.findByKhasID(user.getKhasID());
+        Optional<User> dbUser = userRepository.findByUsernameAndStatus(user.getUsername(), 1);
+        Optional<User> dbUserKhas = userRepository.findByKhasIDAndStatus(user.getKhasID(), 1);
         if (dbUser.isPresent() && user.getPassword().equals(dbUser.get().getPassword())) {
             String token = jwtUtil.generateToken(user.getUsername());
             System.out.println(token);
@@ -125,7 +125,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token.");
             }
             // Kullanıcıyı bul
-            Optional<User> userOptional = userRepository.findByUsername(username);
+            Optional<User> userOptional = userRepository.findByUsernameAndStatus(username, 1);
             if (userOptional.isEmpty()) {
                 System.out.println("User not found.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
@@ -215,8 +215,9 @@ public class AuthController {
             if (user.getRole().equals("instructor")) {
                 performances = performanceRepository.findAll();
             } else {
-                performances = performanceRepository.findByUid(uid);
+                performances = performanceRepository.findByUidAndStatus(uid, 1);
             }
+            
             //performances = performanceRepository.findByUid(uid);
             if (performances.isEmpty()) {
                 System.out.println("No performances found for user ID: " + uid);
@@ -368,7 +369,7 @@ public class AuthController {
             }
             
             // Check if username is already taken
-            Optional<User> existingUser = userRepository.findByUsername(newUsername);
+            Optional<User> existingUser = userRepository.findByUsernameAndStatus(newUsername, 1);
             if (existingUser.isPresent() && existingUser.get().getId() != user.getId()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken");
             }
@@ -407,6 +408,38 @@ public class AuthController {
             }
         } catch (Exception e) {
             System.err.println("Error occurred while fetching user info: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
+        }
+    }
+
+    @PostMapping("/deleteAccount")
+    public ResponseEntity<String> deleteAccount(@RequestParam("uid") int uid, @RequestHeader("Authorization") String authHeader) {
+        try {
+            // Fetch user info (authentication)
+            ResponseEntity<Object> userInfoResponse = getUserInfo(authHeader);
+            User user = (User) userInfoResponse.getBody();
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
+            }
+
+            System.out.println("iften öncesi");
+            // Call your service or DB logic to deactivate the account
+            if(databaseAdapter.deactivateUser(uid)){
+                System.out.println("ilk if geldi");
+                if(databaseAdapter.deactivatePerformances(uid)){
+                    System.out.println("ikinci if geldi");
+                    return ResponseEntity.ok("Account deactivated successfully.");
+                }
+                else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or already deactivated.");
+                }
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or already deactivated.");
+            }
+        } catch (Exception e) {
+            System.err.println("Error occurred while deleting account: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
         }
     }

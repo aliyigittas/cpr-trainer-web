@@ -122,6 +122,33 @@ export default function ProfilePage() {
       alert('Failed to update username. Please try again.');
     }
   };
+
+  const handleDeleteAccount = async (uid: number) => {
+    try {
+      const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
+
+      const response = await fetch(`/auth/deleteAccount?uid=${uid}`, {
+        method: 'GET', // note: still using GET here, even though your controller expects POST
+        headers: {
+          'Authorization': token
+        }
+      });
+  
+      const result = await response.text();
+  
+      if (response.ok) {
+        console.log("Account deleted successfully:", result);
+        alert("Your account has been deactivated.");
+      } else {
+        console.error("Failed to delete account:", result);
+        alert("Failed to delete account: " + result);
+      }
+    } catch (error) {
+      console.error("Error while deleting account:", error);
+      alert("An error occurred. Please try again later.");
+    }
+  };
+  
   
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -381,8 +408,9 @@ export default function ProfilePage() {
             <p className="text-sm text-red-700 dark:text-red-300 mb-4">
               Once you delete your account, there is no going back. Please be certain.
             </p>
-            <button
+            <button 
               type="button"
+              onClick={() => handleDeleteAccount(userData.id)}
               className="px-4 py-2 bg-white dark:bg-gray-700 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               Delete Account

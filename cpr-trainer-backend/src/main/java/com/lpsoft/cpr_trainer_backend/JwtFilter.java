@@ -38,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
             String username = jwtUtil.extractUsername(token);
 
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userRepository.findByUsername(username)
+                UserDetails userDetails = userRepository.findByUsernameAndStatus(username, 1)
                         .map(user -> new org.springframework.security.core.userdetails.User(
                                 user.getUsername(), user.getPassword(), new ArrayList<>()))
                         .orElse(null);
