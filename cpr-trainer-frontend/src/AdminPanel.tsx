@@ -6,6 +6,8 @@ import {
   Mail,
   Key,
   ClipboardPen,
+  Delete,
+  Trash,
 } from "lucide-react";
 import TopBar from "./TopBar";
 import User from "./types/User";
@@ -182,6 +184,44 @@ function AdminPanel() {
     }
   };
 
+  // Handle delete account
+  const handleDeleteAccount = async (uid: number) => {
+    try {
+      // are you sure alert
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this account? This action cannot be undone."
+      );
+      if (!confirmDelete) {
+        return;
+      }
+      const token = document.cookie.replace(
+        /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      );
+
+      const response = await fetch(`/api/auth/deleteAccount?uid=${uid}`, {
+        method: "POST", // note: still using GET here, even though your controller expects POST
+        headers: {
+          Authorization: token,
+        },
+      });
+
+      const result = await response.text();
+
+      if (response.ok) {
+        console.log("Account deleted successfully:", result);
+        alert("Account deleted successfully");
+        navigate("/login");
+      } else {
+        console.error("Failed to delete account:", result);
+        alert("Failed to delete account: " + result);
+      }
+    } catch (error) {
+      console.error("Error while deleting account:", error);
+      alert("An error occurred. Please try again later.");
+    }
+  };
+
   // Format date for display
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -232,8 +272,8 @@ function AdminPanel() {
         <div className="space-y-6">
           {isLoading ? (
             <div className="flex flex-row justify-center bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
-                {/* Loading spinner or icon */}
-                <div className="animate-spin h-5 w-5 border-3 border-blue-500 border-t-transparent rounded-full mr-3 mt-0.5"></div>
+              {/* Loading spinner or icon */}
+              <div className="animate-spin h-5 w-5 border-3 border-blue-500 border-t-transparent rounded-full mr-3 mt-0.5"></div>
               <p className="text-gray-600 dark:text-gray-300">
                 Loading users...
               </p>
@@ -265,9 +305,20 @@ function AdminPanel() {
 
                     {/* Role Badge */}
                     <div
-                      className="relative"
+                      className="relative gap-2 flex items-center"
                       ref={(el) => (dropdownRefs.current[user.id] = el)}
                     >
+                      <button
+                        onClick={() => handleDeleteAccount(user.id)}
+                        className="text-red-500 transition-colors bg-red-100 dark:bg-red-800 dark:text-red-100 rounded px-2.5 py-1 border border-transparent text-xs font-medium cursor-pointer hover:bg-red-200 dark:hover:bg-red-700 focus:outline-none"
+                      >
+                        <div className="flex items-center flex-row">
+                          <Trash className="mr-1 h-3.5 w-3.5" />
+                          <span className="text-sm font-medium">
+                            Deactivate User
+                          </span>
+                        </div>
+                      </button>
                       <button
                         onClick={() => toggleRoleDropdown(user.id)}
                         className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded cursor-pointer

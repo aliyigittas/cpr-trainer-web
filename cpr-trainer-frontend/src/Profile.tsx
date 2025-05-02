@@ -125,6 +125,12 @@ export default function ProfilePage() {
 
   const handleDeleteAccount = async (uid: number) => {
     try {
+      const confirmDelete = window.confirm(
+        "Are you sure you want to delete this account? This action cannot be undone."
+      );
+      if (!confirmDelete) {
+        return;
+      }
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
 
       const response = await fetch(`/api/auth/deleteAccount?uid=${uid}`, {
@@ -412,7 +418,7 @@ export default function ProfilePage() {
             <button 
               type="button"
               onClick={() => handleDeleteAccount(userData.id)}
-              className="px-4 py-2 bg-white dark:bg-gray-700 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              className="px-4 py-2 bg-white dark:bg-gray-700 text-red-600 dark:text-red-300 border border-red-300 dark:border-red-600 rounded-md hover:bg-red-50 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
             >
               Delete Account
             </button>

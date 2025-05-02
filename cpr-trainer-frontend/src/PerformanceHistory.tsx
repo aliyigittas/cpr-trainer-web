@@ -276,6 +276,7 @@ function CPRPerformanceDashboard() {
   // Fetch performance data
   useEffect(() => {
     async function fetchPerformances() {
+      if(userData.role === "admin") return;
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("token="));
