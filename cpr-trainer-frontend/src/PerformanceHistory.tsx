@@ -411,8 +411,16 @@ function CPRPerformanceDashboard() {
   const filteredPerformances = performances.filter((perf) => {
     // feedback type match
     const feedbackMatch =
-      selectedFeedbackTypes.length === 0 ||
-      selectedFeedbackTypes.some((type) => perf.feedbackType.includes(type));
+  selectedFeedbackTypes.length === 0 ||
+  selectedFeedbackTypes.every((type) => {
+    // Create a string of the selected feedback types in the V, A, H order
+    const selectedTypesString = selectedFeedbackTypes
+      .sort((a, b) => ["V", "A", "H"].indexOf(a) - ["V", "A", "H"].indexOf(b))
+      .join('');
+
+    // Check if the performance feedbackType matches the selected combination
+    return perf.feedbackType === selectedTypesString;
+  });
 
     // note status match
     const hasNote = performanceNotesMap[perf.id] ?? false;
