@@ -33,7 +33,7 @@ public class DatabaseAdapter {
             String sql = "INSERT INTO `cpr`.`performances` (" +
                          "uid, feedbackType, meanDepth, meanFreq, stdDepth, stdFreq, " +
                          "highDepthCount, highFreqCount, lowDepthCount, lowFreqCount, " +
-                         "totalCompression, score, trainingTime, performanceDate" +
+                         "totalCompression, score, trainingTime, performanceDate, " +
                          "status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
             jdbcTemplate.update(sql,
