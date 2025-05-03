@@ -1,5 +1,5 @@
 import { useState, useEffect, JSX } from 'react';
-import { X, Award, BarChart2, Clock } from 'lucide-react';
+import { X, BarChart2, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine, ReferenceArea } from 'recharts';
 import Performance from './types/Performance';
 

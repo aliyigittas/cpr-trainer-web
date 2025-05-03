@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import { AlertTriangle, Home, ArrowLeft } from "lucide-react";
+import { AlertTriangle, Home } from "lucide-react";
 import TopBar from "./TopBar";
 
 function NotFound() {

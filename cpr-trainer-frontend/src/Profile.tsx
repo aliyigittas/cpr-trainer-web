@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Eye, EyeOff, Check, X, User, Edit2, Save } from 'lucide-react';
+import { Eye, EyeOff, Check, X, Edit2, Save } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import SHA256 from 'crypto-js/sha256';
-import axios from "axios";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import axios, { AxiosError } from 'axios';
 import TopBar from './TopBar';
 
 interface UserData {
@@ -35,7 +36,7 @@ export default function ProfilePage() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordChanged, setPasswordChanged] = useState(false);
+  //const [passwordChanged, setPasswordChanged] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   
@@ -94,7 +95,7 @@ export default function ProfilePage() {
     try {
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
       
-      const response = await axios.post('/api/auth/update-username', {
+      await axios.post('/api/auth/update-username', {
         username: newUsername
       }, {
         headers: {
@@ -113,8 +114,8 @@ export default function ProfilePage() {
         setUsernameSuccess(false);
       }, 3000);
       
-    } catch (error: any) {
-      if (error.response && error.response.data) {
+    } catch (error: AxiosError | unknown) {
+      if (axios.isAxiosError(error) && error.response && error.response.data) {
         setUsernameError(error.response.data);
       } else {
         setUsernameError('An error occurred. Please try again.');
@@ -187,13 +188,14 @@ export default function ProfilePage() {
         setPasswordError('New password must be different from your current password');
         return;
       }
+      const token = document.cookie.split("; ").find((row) => row.startsWith("token="))?.split("=")[1] || ''
       
-      const response = await axios.post('/api/auth/change-password', {
+      await axios.post('/api/auth/change-password', {
         currentPassword: hashedCurrentPassword,
         newPassword: hashedNewPassword
       }, {
         headers: {
-          Authorization: `${document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1")}`
+          Authorization: token
         }
       });
       
@@ -209,9 +211,9 @@ export default function ProfilePage() {
         setPasswordSuccess(false);
       }, 3000);
       
-    } catch (error: any) {
+    } catch (error: AxiosError | unknown) {
       // Handle errors
-      if (error.response && error.response.data) {
+      if (axios.isAxiosError(error) && error.response && error.response.data) {
         setPasswordError(error.response.data);
       } else {
         setPasswordError('An error occurred. Please try again.');

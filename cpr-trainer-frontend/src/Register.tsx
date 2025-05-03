@@ -93,7 +93,7 @@ export default function RegisterPage() {
       } else {
         console.log('No token found in cookie');
       }
-    },[])
+    },[navigate]);
 
   return (
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300 dark:bg-gray-900 bg-gray-100">

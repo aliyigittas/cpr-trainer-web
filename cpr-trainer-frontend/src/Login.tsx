@@ -63,13 +63,13 @@ export default function LoginPage() {
     if (tokenCookie) {
       const tokenValue = tokenCookie.split("=")[1];
       setToken(tokenValue);
-      console.log("Token found in cookie:", tokenValue);
+      console.log("Token found in cookie:", token);
       // Redirect to performance history page
       navigate("/performanceHistory");
     } else {
       console.log("No token found in cookie");
     }
-  }, []);
+  }, [navigate, token]);
 
   return (
     <div className="flex min-h-screen items-center justify-center transition-colors duration-300 dark:bg-gray-900 bg-gray-100">

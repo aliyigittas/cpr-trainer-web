@@ -19,10 +19,9 @@ function Introduction() {
       .find((row) => row.startsWith("token="))
       ?.split("=")[1];
     if (token) {
-      
       navigate("/performanceHistory");
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div

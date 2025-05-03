@@ -6,7 +6,6 @@ import {
   Mail,
   Key,
   ClipboardPen,
-  Delete,
   Trash,
 } from "lucide-react";
 import TopBar from "./TopBar";
@@ -306,7 +305,7 @@ function AdminPanel() {
                     {/* Role Badge */}
                     <div
                       className="relative gap-2 flex items-center"
-                      ref={(el) => (dropdownRefs.current[user.id] = el)}
+                      ref={(el) => {dropdownRefs.current[user.id] = el}}
                     >
                       <button
                         onClick={() => handleDeleteAccount(user.id)}
