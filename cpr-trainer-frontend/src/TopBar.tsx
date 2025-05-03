@@ -42,7 +42,7 @@ function TopBar() {
         <div className="flex justify-between h-16">
           <div
             className="flex items-center cursor-pointer"
-            onClick={() => safeNavigate("/performanceHistory")}
+            onClick={() => safeNavigate("/")}
           >
             <div className="flex-shrink-0 flex items-center">
               <img src={cprLogo} alt="Logo" className="h-8 w-8 rounded-md" />
