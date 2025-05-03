@@ -1,6 +1,6 @@
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, LogIn } from "lucide-react";
 import { ThemeToggle } from "./components/ThemeToggle";
-import cprLogo from "./assets/cprLogo.jpg";
+import cprLogo from "./assets/cprLogo.png";
 import { useLocation, useNavigate } from "react-router";
 
 function TopBar() {
@@ -58,7 +58,8 @@ function TopBar() {
             <ThemeToggle />
 
             {/* Profile */}
-            {window.location.pathname !== "/adminPanel" && (
+            {window.location.pathname !== "/adminPanel" && window.location.pathname !== "/"
+             && (
               <button
                 className="bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
                 onClick={() => safeNavigate("/profile")}
@@ -69,13 +70,26 @@ function TopBar() {
             )}
 
             {/* Logout */}
-            <button
+            { window.location.pathname !== "/" &&
+              <button
               className="bg-white dark:bg-gray-800 p-1 rounded-full text-red-400 hover:text-red-600 dark:hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors cursor-pointer"
               onClick={handleLogout}
             >
               <span className="sr-only">Logout</span>
               <LogOut className="h-6 w-6" />
             </button>
+            }
+            {
+              window.location.pathname === "/" && (
+                <button
+                  className="flex flex-row gap-2 bg-white dark:bg-gray-800 p-1 rounded-full text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                  onClick={() => safeNavigate("/login")}
+                >
+                  <LogIn className="h-6 w-6" />
+                  <span className="">Sign in</span>
+                </button>
+              )
+            }
           </div>
         </div>
       </div>
