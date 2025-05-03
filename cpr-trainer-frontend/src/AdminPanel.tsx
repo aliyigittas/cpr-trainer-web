@@ -310,11 +310,11 @@ function AdminPanel() {
                     >
                       <button
                         onClick={() => handleDeleteAccount(user.id)}
-                        className="text-red-500 transition-colors bg-red-100 dark:bg-red-800 dark:text-red-100 rounded px-2.5 py-1 border border-transparent text-xs font-medium cursor-pointer hover:bg-red-200 dark:hover:bg-red-700 focus:outline-none"
+                        className="text-red-500 transition-colors bg-red-100 dark:bg-red-800 dark:text-red-100 rounded px-2.5 py-1.5 border border-transparent text-xs font-medium cursor-pointer hover:bg-red-200 dark:hover:bg-red-700 focus:outline-none"
                       >
                         <div className="flex items-center flex-row">
                           <Trash className="mr-1 h-3.5 w-3.5" />
-                          <span className="text-sm font-medium">
+                          <span className="text-xs font-medium">
                             Deactivate User
                           </span>
                         </div>

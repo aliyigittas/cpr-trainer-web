@@ -5,6 +5,7 @@ import {
   Filter,
   Clock,
   UserCircle2Icon,
+  Award,
 } from "lucide-react";
 import Performance from "./types/Performance";
 import CPRPerformanceDetailPopup from "./PerformanceDetails";
@@ -52,17 +53,23 @@ function CPRPerformanceDashboard() {
   const navigate = useNavigate();
 
   const [isTypeFilterOpen, setIsTypeFilterOpen] = useState<boolean>(false);
-  const [selectedFeedbackTypes, setSelectedFeedbackTypes] = useState<FeedbackType[]>([]);
+  const [selectedFeedbackTypes, setSelectedFeedbackTypes] = useState<
+    FeedbackType[]
+  >([]);
   const typeFilterRef = useRef<HTMLDivElement | null>(null);
   const [usernames, setUsernames] = useState<{ [key: number]: string }>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [performanceNotesMap, setPerformanceNotesMap] = useState<{ [key: number]: boolean }>({});
-  const [selectedNoteStatuses, setSelectedNoteStatuses] = useState<string[]>([]);
+  const [performanceNotesMap, setPerformanceNotesMap] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [selectedNoteStatuses, setSelectedNoteStatuses] = useState<string[]>(
+    []
+  );
   const [isNoteFilterOpen, setIsNoteFilterOpen] = useState(false);
   const noteFilterRef = useRef<HTMLDivElement | null>(null);
   const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
   const [instructorNote, setInstructorNote] = useState<string[]>([]);
-  
+
   // Select all feedback types
   const selectAllFeedbackTypes = (): void => {
     setSelectedFeedbackTypes(["A", "H", "V"]);
@@ -75,17 +82,20 @@ function CPRPerformanceDashboard() {
       setSelectedNoteStatuses([...selectedNoteStatuses, status]);
     }
   };
-  
+
   const selectAllNoteStatuses = () => {
     setSelectedNoteStatuses(["noted", "not-noted"]);
   };
-  
+
   const clearNoteFilters = () => {
     setSelectedNoteStatuses([]);
   };
-  
+
   const getNoteFilterLabel = () => {
-    if (selectedNoteStatuses.length === 0 || selectedNoteStatuses.length === 2) {
+    if (
+      selectedNoteStatuses.length === 0 ||
+      selectedNoteStatuses.length === 2
+    ) {
       return "All Notes";
     } else if (selectedNoteStatuses.includes("noted")) {
       return "Noted Only";
@@ -131,10 +141,9 @@ function CPRPerformanceDashboard() {
     navigate(`/performanceHistory/${performance.id}`, { replace: true });
   };
 
-  const handleViewProgress = (performances: Performance[]) => {
+  const handleViewProgress = () => {
     setShowProgressPopup(true);
     navigate(`/performanceHistory/scoreProgress`, { replace: true });
-
   };
 
   const formatTrainingTime = (seconds: number): string => {
@@ -147,7 +156,7 @@ function CPRPerformanceDashboard() {
   };
 
   const fetchUsernames = async (performances: Performance[]) => {
-    if(userData.role !== "instructor") return;
+    if (userData.role !== "instructor") return;
     const uniqueIds = [...new Set(performances.map((p) => p.uid))];
 
     const userMap: { [key: number]: string } = {};
@@ -209,12 +218,13 @@ function CPRPerformanceDashboard() {
   // Toggle selection of a feedback type
   const toggleFeedbackType = (type: FeedbackType): void => {
     if (selectedFeedbackTypes.includes(type)) {
-      setSelectedFeedbackTypes(selectedFeedbackTypes.filter((item) => item !== type));
+      setSelectedFeedbackTypes(
+        selectedFeedbackTypes.filter((item) => item !== type)
+      );
     } else {
       setSelectedFeedbackTypes([...selectedFeedbackTypes, type]);
     }
   };
-
 
   // Format the selected types for display
   const getDisplayText = (): string => {
@@ -276,7 +286,7 @@ function CPRPerformanceDashboard() {
   // Fetch performance data
   useEffect(() => {
     async function fetchPerformances() {
-      if(userData.role === "admin") return;
+      if (userData.role === "admin") return;
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("token="));
@@ -299,34 +309,50 @@ function CPRPerformanceDashboard() {
         const notesMap: { [key: number]: boolean } = {};
         await Promise.all(
           performanceData.map(async (perf: Performance) => {
-            const token = document.cookie.split('; ').find(row => row.startsWith('token='));
-            const response = await fetch(`/api/auth/getPerformanceNotes?param=${perf.id}`, {
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `${token ? token.split('=')[1] : ''}`
+            const token = document.cookie
+              .split("; ")
+              .find((row) => row.startsWith("token="));
+            const response = await fetch(
+              `/api/auth/getPerformanceNotes?param=${perf.id}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `${token ? token.split("=")[1] : ""}`,
+                },
               }
-            });
+            );
 
             if (response.ok) {
               const notes = await response.json();
               const instructorNoteArray: string[] = [];
               const aiNotesArray: PerformanceNote[] = [];
-            
-              notes.forEach((noteObj: {
-                id: number;
-                performanceid: number;
-                notetype: string;
-                note: string;
-              }) => {
-                if (noteObj.notetype === 'H') {
-                  instructorNoteArray.push(noteObj.note);
-                } else if (noteObj.notetype === 'A') {
-                  const parsedNotes: PerformanceNote[] = noteObj.note ? JSON.parse(noteObj.note) : [];
-                  aiNotesArray.push(...parsedNotes);
+
+              notes.forEach(
+                (noteObj: {
+                  id: number;
+                  performanceid: number;
+                  notetype: string;
+                  note: string;
+                }) => {
+                  if (noteObj.notetype === "H") {
+                    instructorNoteArray.push(noteObj.note);
+                  } else if (noteObj.notetype === "A") {
+                    const parsedNotes: PerformanceNote[] = noteObj.note
+                      ? JSON.parse(noteObj.note)
+                      : [];
+                    aiNotesArray.push(...parsedNotes);
+                  }
                 }
-              });
-            
-              notesMap[perf.id] = notes.some((n: any) => n.notetype === 'H');
+              );
+
+              notesMap[perf.id] = notes.some(
+                (n: {
+                  id: number;
+                  performanceid: number;
+                  notetype: string;
+                  note: string;
+                }) => n.notetype === "H"
+              );
             } else {
               notesMap[perf.id] = false;
             }
@@ -387,19 +413,18 @@ function CPRPerformanceDashboard() {
     const feedbackMatch =
       selectedFeedbackTypes.length === 0 ||
       selectedFeedbackTypes.some((type) => perf.feedbackType.includes(type));
-  
+
     // note status match
     const hasNote = performanceNotesMap[perf.id] ?? false;
-  
+
     const noteMatch =
       selectedNoteStatuses.length === 0 || // no filter
       selectedNoteStatuses.length === 2 || // both filters = all
       (selectedNoteStatuses.includes("noted") && hasNote) ||
       (selectedNoteStatuses.includes("not-noted") && !hasNote);
-  
+
     return feedbackMatch && noteMatch;
   });
-  
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -434,177 +459,181 @@ function CPRPerformanceDashboard() {
         </div>
 
         {/* Filters and sorting */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-          <div className="flex items-center space-x-4">
-            <div>
-              <button
-                onClick={handleSort}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-              >
-                <Calendar className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                Sort by Date
-                <ChevronDown
-                  className={`ml-1 h-4 w-4 transform ${
-                    sortOrder === "desc" ? "" : "rotate-180"
-                  }`}
-                />
-              </button>
-            </div>
+        <div className="flex justify-between items-center mb-6 space-x-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+            <div className="flex items-center space-x-4">
+              <div>
+                <button
+                  onClick={handleSort}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                >
+                  <Calendar className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  Sort by Date
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transform ${
+                      sortOrder === "desc" ? "" : "rotate-180"
+                    }`}
+                  />
+                </button>
+              </div>
 
-            <div className="relative" ref={typeFilterRef}>
-              <button
-                onClick={toggleFeedackFilterDropdown}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-              >
-                <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                Filter: {getDisplayText()}
-                <ChevronDown
-                  className={`ml-1 h-4 w-4 transform ${
-                    isTypeFilterOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+              <div className="relative" ref={typeFilterRef}>
+                <button
+                  onClick={toggleFeedackFilterDropdown}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                >
+                  <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  Filter: {getDisplayText()}
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transform ${
+                      isTypeFilterOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-              {isTypeFilterOpen && (
-                <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
-                  <div className="py-1">
-                    <div className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200">
-                      Feedback Types
+                {isTypeFilterOpen && (
+                  <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
+                    <div className="py-1">
+                      <div className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Feedback Types
+                      </div>
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeedbackTypes.length === 3}
+                            onChange={selectAllFeedbackTypes}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="font-medium">All Types</span>
+                        </label>
+                      </div>
+
+                      <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeedbackTypes.includes("A")}
+                            onChange={() => toggleFeedbackType("A")}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Audio (A)
+                        </label>
+                      </div>
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeedbackTypes.includes("H")}
+                            onChange={() => toggleFeedbackType("H")}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Haptic (H)
+                        </label>
+                      </div>
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedFeedbackTypes.includes("V")}
+                            onChange={() => toggleFeedbackType("V")}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Visual (V)
+                        </label>
+                      </div>
                     </div>
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeedbackTypes.length === 3}
-                          onChange={selectAllFeedbackTypes}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="font-medium">All Types</span>
-                      </label>
-                    </div>
-
-                    <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeedbackTypes.includes("A")}
-                          onChange={() => toggleFeedbackType("A")}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        Audio (A)
-                      </label>
-                    </div>
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeedbackTypes.includes("H")}
-                          onChange={() => toggleFeedbackType("H")}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        Haptic (H)
-                      </label>
-                    </div>
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedFeedbackTypes.includes("V")}
-                          onChange={() => toggleFeedbackType("V")}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        Visual (V)
-                      </label>
-                    </div>
-                  </div>
-                  <div className="py-1">
-                    <button
-                      onClick={() => setSelectedFeedbackTypes([])}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                    >
-                      Clear filters
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="relative" ref={noteFilterRef}>
-              <button
-                onClick={() => setIsNoteFilterOpen(!isNoteFilterOpen)}
-                className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
-              >
-                <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
-                Filter: {getNoteFilterLabel()}
-                <ChevronDown
-                  className={`ml-1 h-4 w-4 transform ${isNoteFilterOpen ? "rotate-180" : ""}`}
-                />
-              </button>
-
-              {isNoteFilterOpen && (
-                <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
-                  <div className="py-1">
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedNoteStatuses.length === 2}
-                          onChange={selectAllNoteStatuses}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        <span className="font-medium">All Notes</span>
-                      </label>
-                    </div>
-
-                    <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
-
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedNoteStatuses.includes("noted")}
-                          onChange={() => toggleNoteStatus("noted")}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        Noted Only
-                      </label>
-                    </div>
-
-                    <div className="px-4 py-1">
-                      <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedNoteStatuses.includes("not-noted")}
-                          onChange={() => toggleNoteStatus("not-noted")}
-                          className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                        />
-                        Not Noted
-                      </label>
+                    <div className="py-1">
+                      <button
+                        onClick={() => setSelectedFeedbackTypes([])}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      >
+                        Clear filters
+                      </button>
                     </div>
                   </div>
+                )}
+              </div>
 
-                  <div className="py-1">
-                    <button
-                      onClick={clearNoteFilters}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                    >
-                      Clear filters
-                    </button>
+              <div className="relative" ref={noteFilterRef}>
+                <button
+                  onClick={() => setIsNoteFilterOpen(!isNoteFilterOpen)}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+                >
+                  <Filter className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  Filter: {getNoteFilterLabel()}
+                  <ChevronDown
+                    className={`ml-1 h-4 w-4 transform ${
+                      isNoteFilterOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {isNoteFilterOpen && (
+                  <div className="absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-600 focus:outline-none z-10 transition-colors">
+                    <div className="py-1">
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedNoteStatuses.length === 2}
+                            onChange={selectAllNoteStatuses}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <span className="font-medium">All Notes</span>
+                        </label>
+                      </div>
+
+                      <div className="border-t border-gray-100 dark:border-gray-600 my-1"></div>
+
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedNoteStatuses.includes("noted")}
+                            onChange={() => toggleNoteStatus("noted")}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Noted Only
+                        </label>
+                      </div>
+
+                      <div className="px-4 py-1">
+                        <label className="flex items-center text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 px-2 py-1 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedNoteStatuses.includes("not-noted")}
+                            onChange={() => toggleNoteStatus("not-noted")}
+                            className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          Not Noted
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="py-1">
+                      <button
+                        onClick={clearNoteFilters}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                      >
+                        Clear filters
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-            <div className="mt-4 flex justify-end">
-              <button
-                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
-                onClick={() => handleViewProgress(performances)}
-              >
-                View Details
-              </button>
-            </div>
-
           </div>
+          {userData.role == "user" && (
+            <button
+              onClick={handleViewProgress}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
+            >
+              <Award className="mr-2 h-4 w-4 text-gray-500 dark:text-gray-400" />
+              View Progress
+            </button>
+          )}
         </div>
 
         {/* Performance cards */}
@@ -617,8 +646,8 @@ function CPRPerformanceDashboard() {
                 Loading performances...
               </p>
             </div>
-          ) : (
-            filteredPerformances.length > 0 ? filteredPerformances.map((performance) => (
+          ) : filteredPerformances.length > 0 ? (
+            filteredPerformances.map((performance) => (
               <div
                 key={performance.id}
                 className="bg-white dark:bg-gray-800 shadow rounded-lg overflow-hidden hover:shadow-md transition-all"
@@ -712,13 +741,13 @@ function CPRPerformanceDashboard() {
                   </div>
                 </div>
               </div>
-            )): (
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
-                <p className="text-gray-600 dark:text-gray-300">
-                  No performances found.
-                </p>
-              </div>
-            )
+            ))
+          ) : (
+            <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 text-center">
+              <p className="text-gray-600 dark:text-gray-300">
+                No performances found.
+              </p>
+            </div>
           )}
         </div>
       </div>
@@ -740,13 +769,13 @@ function CPRPerformanceDashboard() {
       )}
 
       {/*Performance Progress Popup */}
-      {showProgressPopup && performances &&(
+      {showProgressPopup && performances && (
         <PerformanceScorePopup
-        performance={performances}
-        onClose={() => {
-          setShowProgressPopup(false);
-          navigate(`/performanceHistory`, { replace: true });
-        }}
+          performance={performances}
+          onClose={() => {
+            setShowProgressPopup(false);
+            navigate(`/performanceHistory`, { replace: true });
+          }}
         />
       )}
     </div>
