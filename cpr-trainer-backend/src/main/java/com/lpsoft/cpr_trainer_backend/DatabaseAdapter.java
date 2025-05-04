@@ -141,24 +141,13 @@ public class DatabaseAdapter {
 
     public Boolean saveInstructorNote(int performanceid, String noteType, String note) {
         try {
-            // Önce bu performanceid ve notetype için kayıt var mı kontrol edelim
-            String checkSql = "SELECT COUNT(*) FROM `cpr`.`performancenotes` " +
-                             "WHERE performanceid = ? AND notetype = ?";
-            int count = jdbcTemplate.queryForObject(checkSql, Integer.class, performanceid, noteType);
-    
-            if (count > 0) {
-                // Kayıt varsa UPDATE yap
-                String updateSql = "UPDATE `cpr`.`performancenotes` SET note = ? " +
-                                 "WHERE performanceid = ? AND notetype = ?";
-                jdbcTemplate.update(updateSql, note, performanceid, noteType);
-            } else {
-                // Kayıt yoksa INSERT yap
-                String insertSql = "INSERT INTO `cpr`.`performancenotes` " +
-                                  "(performanceid, notetype, note) VALUES (?, ?, ?)";
-                jdbcTemplate.update(insertSql, performanceid, noteType, note);
-            }
+            
+            String insertSql = "INSERT INTO `cpr`.`performancenotes` " +
+            "(performanceid, notetype, note) VALUES (?, ?, ?)";
+            jdbcTemplate.update(insertSql, performanceid, noteType, note);
+            
             return true;
-        } catch (Exception e) {
+        } catch (DataAccessException e) {
             System.err.println("❌ Performans notu eklenirken/güncellenirken hata oluştu: " + e.getMessage());
             return false;
         }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.lpsoft.cpr_trainer_backend.CprTrainerBackendApplication.createDump;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceDetailsRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceNotesRepository;
 import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
@@ -67,10 +68,11 @@ public class AuthController {
         else if(userRepository.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
-        else if(user.getKhasID() != "" && userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
+        else if(!"".equals(user.getKhasID()) && userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This khas id is already taken.\"}");
         }
         userRepository.save(user);
+        createDump(); // Call to createDump() after saving the user
         return ResponseEntity.ok("Registration is successful.");
     }
 
@@ -187,6 +189,7 @@ public class AuthController {
             User userToUpdateObj = userToUpdate.get();
             userToUpdateObj.setRole(newRole);
             userRepository.save(userToUpdateObj);
+            createDump();
             return ResponseEntity.ok("User role updated successfully.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
@@ -299,6 +302,7 @@ public class AuthController {
                     databaseAdapter.updateInstructorNote(Integer.parseInt(performanceid), notetype, note);
                 }
                 //TODO: create dump to database
+                createDump();
             }
             
         } catch (Exception e) {
@@ -339,6 +343,7 @@ public class AuthController {
             // Şifreyi güncelle
             user.setPassword(newPassword);
             userRepository.save(user);
+            createDump(); // Call to createDump() after updating the password
             
             return ResponseEntity.ok("Password changed successfully");
         } catch (Exception e) {
@@ -377,6 +382,7 @@ public class AuthController {
             // Update username
             user.setUsername(newUsername);
             userRepository.save(user);
+            createDump(); // Call to createDump() after updating the username
             
             return ResponseEntity.ok("Username updated successfully");
         } catch (Exception e) {
@@ -423,16 +429,15 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
             }
 
-            System.out.println("iften öncesi");
             // Call your service or DB logic to deactivate the account
             if(databaseAdapter.deactivateUser(uid)){
-                System.out.println("ilk if geldi");
                 if(databaseAdapter.deactivatePerformances(uid)){
-                    System.out.println("ikinci if geldi");
+                    createDump(); // Call to createDump() after deactivating the account
                     return ResponseEntity.ok("Account deactivated successfully.");
                 }
                 else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Account not found or already deactivated.");
+                    createDump(); // Call to createDump() after deactivating the account
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Performance not found or already deactivated.");
                 }
             }
             else {

@@ -73,7 +73,7 @@ public class CprTrainerBackendApplication {
             System.out.println("Received user data: " + performance);
             //parse user data from class it will come as json format
             Performance performanceData = new ObjectMapper().readValue(performance, Performance.class);
-            String openAiResponse = askOpenAi(performance); // Burada çağırdığın anda bekler!
+            String openAiResponse = askOpenAi(performanceData); // Burada çağırdığın anda bekler!
             System.out.println("OpenAI Response: " + openAiResponse);
 
             //insert to users table
@@ -116,16 +116,47 @@ public class CprTrainerBackendApplication {
     }
 
     //@PostMapping("/askOpenAi")
-    public String askOpenAi(@RequestBody String data) {
+    public String askOpenAi(@RequestBody Performance data) {
         ObjectMapper objectMapper = new ObjectMapper();
         RestTemplate restTemplate = new RestTemplate();
         String apiKey = "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"; // Buraya kendi API Key'ini yaz
 
+        String meanDepth = String.valueOf(data.getMeanDepth());
+        String meanFreq = String.valueOf(data.getMeanFreq());
+        String stdDepth = String.valueOf(data.getStdDepth());
+        String stdFreq = String.valueOf(data.getStdFreq());
+        String highDepthCount = String.valueOf(data.getHighDepthCount());
+        String highFreqCount = String.valueOf(data.getHighFreqCount());
+        String lowDepthCount = String.valueOf(data.getLowDepthCount());
+        String lowFreqCount = String.valueOf(data.getLowFreqCount());
+        String totalCompression = String.valueOf(data.getTotalCompression());
+        String score = String.valueOf(data.getScore());
+        String trainingTime = String.valueOf(data.getTrainingTime());
+
+        String newData= """
+                {
+                    "meanDepth": %s,
+                    "meanFreq": %s,
+                    "stdDepth": %s,
+                    "stdFreq": %s,
+                    "highDepthCount": %s,
+                    "highFreqCount": %s,
+                    "lowDepthCount": %s,
+                    "lowFreqCount": %s,
+                    "totalCompression": %s,
+                    "score": %s,
+                    "trainingTime": %s
+                }
+                """.formatted(meanDepth, meanFreq, stdDepth, stdFreq, highDepthCount, highFreqCount, lowDepthCount, lowFreqCount, totalCompression, score, trainingTime);
 
         String finalPrompt = """
             You are an expert CPR training performance reviewer.
 
             You are given a dataset from a CPR training session. Analyze the provided performance metrics carefully.
+
+            Ideal CPR performance standards:
+            • Compression Depth: 50–60 mm
+            • Compression Frequency (Rate): 100–120 compressions per minute
 
             Your task:
             - Summarize the CPR performance into exactly 4-5 key points.
@@ -138,7 +169,7 @@ public class CprTrainerBackendApplication {
             - Focus on depth quality, frequency control, consistency, and overall performance score.
 
             Here is the data you must analyze: "\n"
-            """ + data + "\n";
+            """ + newData + "\n";
 
         try {
             // JSON nesnesi oluştur
@@ -227,29 +258,6 @@ public class CprTrainerBackendApplication {
         }
     }
     
-    @PostMapping("/register")
-    public String registerUser(@RequestBody String user) {
-        try {
-            System.out.println("Received user data: " + user);
-            //parse user data from class it will come as json format
-            User userData = new ObjectMapper().readValue(user, User.class);
-
-            //insert to users table
-            if (databaseAdapter.registerUser(userData)) {
-                System.out.println("✅ Kullanıcı başarıyla eklendi!");
-                createDump();
-            } else {
-                System.err.println("❌ Kullanıcı eklenirken hata oluştu!");
-                return "Error adding user!";
-            }
-            
-            return "User created successfully: " + userData.getFirstname() + " " + userData.getSurname();
-        } catch (JsonProcessingException ex) {
-            //ex.printStackTrace();
-            return "Error processing user data!";
-        }
-    }
-
     //get uid from email in getmapping
    @CrossOrigin(origins = "*") // Allow all origins (use with caution)
    @GetMapping("/getUid")
