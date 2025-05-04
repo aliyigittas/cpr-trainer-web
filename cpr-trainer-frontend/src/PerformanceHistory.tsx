@@ -305,7 +305,11 @@ function CPRPerformanceDashboard() {
 
       if (response.ok) {
         const performanceData = await response.json();
-        setPerformances(performanceData);
+        const sortedData = performanceData.sort(
+          (a: Performance, b: Performance) =>
+            new Date(b.performanceDate).getTime() - new Date(a.performanceDate).getTime()
+        );
+        setPerformances(sortedData);
         const notesMap: { [key: number]: boolean } = {};
         await Promise.all(
           performanceData.map(async (perf: Performance) => {
@@ -412,7 +416,7 @@ function CPRPerformanceDashboard() {
     // feedback type match
     const feedbackMatch =
   selectedFeedbackTypes.length === 0 ||
-  selectedFeedbackTypes.every((type) => {
+  selectedFeedbackTypes.every(() => {
     // Create a string of the selected feedback types in the V, A, H order
     const selectedTypesString = selectedFeedbackTypes
       .sort((a, b) => ["V", "A", "H"].indexOf(a) - ["V", "A", "H"].indexOf(b))
@@ -459,10 +463,16 @@ function CPRPerformanceDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors">
-            CPR Performance History
+            { userData.role === "instructor"
+              ? "Instructor Dashboard"
+              :
+            "CPR Performance History"}
           </h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 transition-colors">
-            Track and analyze your CPR training sessions
+            { userData.role === "instructor"
+              ? "View and manage your students' CPR performance data."
+              :
+            "View your CPR performance history and feedback."}
           </p>
         </div>
 

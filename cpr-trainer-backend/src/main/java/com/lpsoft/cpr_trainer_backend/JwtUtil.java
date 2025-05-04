@@ -10,7 +10,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "senin-secret-keyin";
+    private final String SECRET_KEY = "THIS-IS-SO-SECURE";
 
     public String generateToken(String username) {
         return Jwts.builder()
