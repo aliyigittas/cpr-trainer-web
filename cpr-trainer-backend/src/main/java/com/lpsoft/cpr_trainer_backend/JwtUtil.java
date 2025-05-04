@@ -4,13 +4,21 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
 
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "THIS-IS-SO-SECURE";
+    private final String SECRET_KEY;
+
+    public JwtUtil() {
+        Dotenv dotenv = Dotenv.load();
+        this.SECRET_KEY = dotenv.get("JWT_SECRET_KEY");
+        //System.out.println("JWT_SECRET_KEY: " + SECRET_KEY);
+    }
 
     public String generateToken(String username) {
         return Jwts.builder()

@@ -12,6 +12,9 @@ RUN apk add --no-cache mysql-client
 
 RUN apk add mariadb-connector-c
 
+# add .env file
+COPY .env /app/.env
+
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar

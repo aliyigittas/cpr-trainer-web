@@ -30,6 +30,8 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_PROFILES_ACTIVE: dev
       DOCKER_ENV: "true"  # Docker ortamı için çevresel değişken
+    env_file:
+      - ./cpr-trainer-backend/.env
     volumes:
       - ./db-dumps:/app/dumps  # Host:Container
     deploy:
@@ -44,7 +46,7 @@ services:
   db:
     image: mysql:8.3
     ports:
-      - "3306:3306"
+      - "3306:3306" # burası proje teslim edilince kaldırılacak dbye dışarıdan erişim olmaması için
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root

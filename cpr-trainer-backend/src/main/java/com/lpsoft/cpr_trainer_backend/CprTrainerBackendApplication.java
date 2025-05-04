@@ -24,6 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @SpringBootApplication
 @RestController
 public class CprTrainerBackendApplication {
@@ -119,7 +121,9 @@ public class CprTrainerBackendApplication {
     public String askOpenAi(@RequestBody Performance data) {
         ObjectMapper objectMapper = new ObjectMapper();
         RestTemplate restTemplate = new RestTemplate();
-        String apiKey = "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"; // Buraya kendi API Key'ini yaz
+        Dotenv dotenv = Dotenv.load();
+        String apiKey = dotenv.get("OPENAI_API_KEY");
+        //System.out.println("API Key: " + apiKey);
 
         String meanDepth = String.valueOf(data.getMeanDepth());
         String meanFreq = String.valueOf(data.getMeanFreq());
