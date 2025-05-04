@@ -498,7 +498,7 @@ function CPRPerformanceDetailPopup({ performance, depthData, freqData, positionD
                       <YAxis
                         stroke="#9CA3AF"
                         label={{ value: 'Position Score', angle: -90, position: 'insideLeft', offset: 10 }}
-                        domain={[Math.min(IDEAL_MIN_SCORE - 10, Math.min(...(performance.positionArray.length ? performance.positionArray : [IDEAL_MIN_SCORE - 10]))), Math.max(IDEAL_MAX_SCORE, Math.max(...(performance.positionArray.length ? performance.positionArray : [IDEAL_MAX_SCORE + 10])))]}
+                        domain={[0, 100]}
 
                       />
                       <Tooltip
