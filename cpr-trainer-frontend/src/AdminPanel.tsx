@@ -88,7 +88,7 @@ function AdminPanel() {
       //remove the current user from the list
       console.log("Current user ID:", userId);
 
-      const filteredUsers = users.filter((user: User) => user.id !== userId);
+      const filteredUsers = users.filter((user: User) => user.id !== userId && user.status !== 0);
       setUsers(filteredUsers);
       console.log("Users data retrieved:", users);
     } else {
@@ -193,15 +193,14 @@ function AdminPanel() {
       if (!confirmDelete) {
         return;
       }
-      const token = document.cookie.replace(
-        /(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/,
-        "$1"
-      );
+      const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("token="));
 
       const response = await fetch(`/api/auth/deleteAccount?uid=${uid}`, {
         method: "POST", // note: still using GET here, even though your controller expects POST
         headers: {
-          Authorization: token,
+          Authorization: token ? token.split("=")[1] : "",
         },
       });
 
@@ -210,10 +209,15 @@ function AdminPanel() {
       if (response.ok) {
         console.log("Account deleted successfully:", result);
         alert("Account deleted successfully");
-        navigate("/login");
+        window.location.reload();
       } else {
-        console.error("Failed to delete account:", result);
-        alert("Failed to delete account: " + result);
+        //if user does not have performances backend will return 404
+        if (response.status === 404)
+        {
+          alert("Account deleted successfully");
+          //reload the page
+          window.location.reload();
+        }
       }
     } catch (error) {
       console.error("Error while deleting account:", error);
