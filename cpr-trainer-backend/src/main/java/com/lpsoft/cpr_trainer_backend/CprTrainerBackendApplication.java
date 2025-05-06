@@ -219,7 +219,7 @@ public class CprTrainerBackendApplication {
         }
     }
 
-    @GetMapping("/createDump")
+    //@GetMapping("/createDump")
     public static String createDump() {
         // --skip-ssl parametresiyle SSL devre dışı bırakılıyor
         System.out.println("Dump alınıyor...");
