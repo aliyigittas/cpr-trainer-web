@@ -2869,7 +2869,7 @@ INSERT INTO `performances` VALUES
 (12,9,'VA',37.1,92.39,8.83,11.37,0,0,8,7,8,38.19,5.05,'2025-04-29 14:14:42',1),
 (13,9,'VA',40.76,133.91,7.18,52.42,0,40,59,1,62,36.72,30.01,'2025-04-29 16:43:51',1),
 (14,9,'VA',43.45,127.12,5.5,61.76,0,23,54,4,59,50.9,30.01,'2025-04-29 16:48:10',1),
-(15,9,'VA',53.09,111.12,5.8,9.79,5,4,12,2,55,85.55,30.01,'2025-04-29 16:51:53',1),
+(15,9,'VA',53.09,111.12,5.8,9.79,5,4,12,2,55,95,30.01,'2025-04-29 16:51:53',1),
 (16,9,'V',107.24,102.66,36.87,19.7,43,2,4,23,50,46.95,30,'2025-04-29 17:18:14',1),
 (17,9,'VA',65.11,108.05,6.43,15.08,41,12,1,14,53,53.23,30.01,'2025-04-29 17:21:41',1),
 (18,9,'V',65.96,120.01,6.98,32.59,50,33,1,6,57,43.05,30.01,'2025-04-29 17:23:19',1),
@@ -4176,9 +4176,9 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054',NULL,'user',1),
-(10,'da','asd','sad','a@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213',NULL,'user',1),
-(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd',NULL,'user',1);
+(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054','2025-03-29 16:48:10','admin',1),
+(10,'da','asd','sad','ab@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213','2025-04-29 12:48:10','instructor',1),
+(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd','2025-01-29 16:48:10','user',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -4191,4 +4191,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-05-06 12:56:22
+-- Dump completed on 2025-05-07 19:39:30
