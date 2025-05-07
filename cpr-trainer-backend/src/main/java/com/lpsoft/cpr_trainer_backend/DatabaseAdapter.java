@@ -262,11 +262,11 @@ public class DatabaseAdapter {
         }
     }
 
-    public Optional<User> findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+    public Optional<User> findByEmailAndStatus(String email, int status) {
+        String sql = "SELECT * FROM users WHERE email = ? AND status = ?";
     
         try {
-            User user = jdbcTemplate.queryForObject(sql, new Object[]{email}, (rs, rowNum) ->
+            User user = jdbcTemplate.queryForObject(sql, new Object[]{email, status}, (rs, rowNum) ->
             new User(
                 rs.getInt("id"),
                 rs.getString("firstname"),

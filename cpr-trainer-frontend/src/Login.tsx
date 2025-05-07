@@ -27,6 +27,7 @@ export default function LoginPage() {
         username: username,
         password: hashedPassword,
         khasID: username,
+        email: username,
       });
 
       // Backend'den gelen token'ı alıyoruz

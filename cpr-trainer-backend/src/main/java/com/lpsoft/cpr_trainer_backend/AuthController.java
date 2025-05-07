@@ -45,7 +45,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        if(databaseAdapter.findByEmail(user.getEmail()).isPresent()){
+        if(databaseAdapter.findByEmailAndStatus(user.getEmail(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This email is already taken.\"}");
         }
         else if(databaseAdapter.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
@@ -63,6 +63,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody User user) {
         Optional<User> dbUser = databaseAdapter.findByUsernameAndStatus(user.getUsername(), 1);
         Optional<User> dbUserKhas = databaseAdapter.findByKhasIDAndStatus(user.getKhasID(), 1);
+        Optional<User> dbUserEmail = databaseAdapter.findByEmailAndStatus(user.getEmail(), 1);
         //System.out.println("khas:"+dbUserKhas.get().getFirstname());
 
         if (dbUser.isPresent() && user.getPassword().equals(dbUser.get().getPassword())) {
@@ -72,6 +73,12 @@ public class AuthController {
         } 
         else if(dbUserKhas.isPresent() && user.getPassword().equals(dbUserKhas.get().getPassword())){
             User userKhas = databaseAdapter.getUsernameByKhasID(user.getKhasID());
+            String token = jwtUtil.generateToken(userKhas.getUsername());
+            System.out.println(token);
+            return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
+        }
+        else if(dbUserEmail.isPresent() && user.getPassword().equals(dbUserEmail.get().getPassword())){
+            User userKhas = databaseAdapter.getUsernameByKhasID(dbUserEmail.get().getKhasID());
             String token = jwtUtil.generateToken(userKhas.getUsername());
             System.out.println(token);
             return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
