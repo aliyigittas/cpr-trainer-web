@@ -249,6 +249,11 @@ public class AuthController {
                 perf.setPositionArray(positionScore);
             }
 
+            for (Performance perf : performances) {
+                List<PerformanceNotes> notes = databaseAdapter.findByPerformanceid(perf.getId());
+                perf.setPerformanceNotes(notes);
+            }
+
             System.out.println("Performances with arrays: " + performances);
             System.out.println("Performances: " + performances);
 

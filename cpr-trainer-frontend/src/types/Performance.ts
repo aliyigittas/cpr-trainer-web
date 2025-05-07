@@ -1,3 +1,5 @@
+import PerformanceNote from "./PerformanceNote";
+
 type Performance = {
     id: number;
     uid: number;
@@ -17,6 +19,7 @@ type Performance = {
     depthArray: [];
     freqArray: [];
     positionArray: [];
+    notesArray : PerformanceNote[],
     status: number;
 };
 

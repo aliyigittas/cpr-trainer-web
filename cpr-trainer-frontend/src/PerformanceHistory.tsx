@@ -283,26 +283,25 @@ function CPRPerformanceDashboard() {
     }
   }, [performances]);
 
-  // Fetch performance data
   useEffect(() => {
     async function fetchPerformances() {
       if (userData.role === "admin") return;
+  
       const token = document.cookie
         .split("; ")
         .find((row) => row.startsWith("token="));
-      console.log(
-        "Token retrieved:",
-        token ? token.split("=")[1] : "No token found"
-      );
-
+      const authToken = token ? token.split("=")[1] : "";
+  
+      console.log("Token retrieved:", authToken || "No token found");
+  
       const response = await fetch("/api/auth/getPerformance", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `${token ? token.split("=")[1] : ""}`,
+          Authorization: authToken,
         },
       });
-
+  
       if (response.ok) {
         const performanceData = await response.json();
         const sortedData = performanceData.sort(
@@ -310,65 +309,38 @@ function CPRPerformanceDashboard() {
             new Date(b.performanceDate).getTime() - new Date(a.performanceDate).getTime()
         );
         setPerformances(sortedData);
+  
         const notesMap: { [key: number]: boolean } = {};
-        await Promise.all(
-          performanceData.map(async (perf: Performance) => {
-            const token = document.cookie
-              .split("; ")
-              .find((row) => row.startsWith("token="));
-            const response = await fetch(
-              `/api/auth/getPerformanceNotes?param=${perf.id}`,
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `${token ? token.split("=")[1] : ""}`,
-                },
-              }
-            );
-
-            if (response.ok) {
-              const notes = await response.json();
-              const instructorNoteArray: string[] = [];
-              const aiNotesArray: PerformanceNote[] = [];
-
-              notes.forEach(
-                (noteObj: {
-                  id: number;
-                  performanceid: number;
-                  notetype: string;
-                  note: string;
-                }) => {
-                  if (noteObj.notetype === "H") {
-                    instructorNoteArray.push(noteObj.note);
-                  } else if (noteObj.notetype === "A") {
-                    const parsedNotes: PerformanceNote[] = noteObj.note
-                      ? JSON.parse(noteObj.note)
-                      : [];
-                    aiNotesArray.push(...parsedNotes);
-                  }
-                }
-              );
-
-              notesMap[perf.id] = notes.some(
-                (n: {
-                  id: number;
-                  performanceid: number;
-                  notetype: string;
-                  note: string;
-                }) => n.notetype === "H"
-              );
-            } else {
-              notesMap[perf.id] = false;
+        const allAiNotes: PerformanceNote[] = [];
+        const allInstructorNotes: string[] = [];
+  
+        sortedData.forEach((perf: Performance) => {
+          let hasInstructorNote = false;
+  
+          perf.notesArray?.forEach((noteObj) => {
+            // Here, we access the note's `notetype` and `note` properties directly.
+            if (noteObj.notetype === "H") {
+              hasInstructorNote = true;
+              allInstructorNotes.push(noteObj.note);
+            } else if (noteObj.notetype === "A") {
+              const parsedNotes: PerformanceNote[] = noteObj.note
+                ? JSON.parse(noteObj.note)
+                : [];
+              allAiNotes.push(...parsedNotes);
             }
-          })
-        );
+          });
+  
+          // Update the notesMap to track if the performance has an instructor note.
+          notesMap[perf.id] = hasInstructorNote;
+        });
+  
         setPerformanceNotesMap(notesMap);
-        setAiNotes(aiNotes);
-        setInstructorNote(instructorNote);
+        setAiNotes(allAiNotes);
+        setInstructorNote(allInstructorNotes);
+  
         console.log("Notes map:", notesMap);
-
         console.log("Performance data retrieved:", performanceData);
-        // If an ID is provided, filter the performance data
+  
         if (numericId) {
           console.log("Filtering performance data for ID:", numericId);
           const filteredPerformance = performanceData.find(
@@ -380,14 +352,18 @@ function CPRPerformanceDashboard() {
             console.error("Performance not found");
           }
         }
+  
         setIsLoading(false);
       } else {
         console.error("Failed to fetch performance data");
         setIsLoading(false);
       }
     }
+  
     fetchPerformances();
   }, []);
+  
+  
 
   // Sort performances by date
   const handleSort = (): void => {

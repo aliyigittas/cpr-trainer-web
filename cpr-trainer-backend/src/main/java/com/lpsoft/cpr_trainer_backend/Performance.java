@@ -40,6 +40,8 @@ public class Performance {
 
     private List<Double> positionArray;
 
+    private List<PerformanceNotes> performanceNotes;
+
     private int status;
  
     // Constructor
@@ -56,7 +58,7 @@ public class Performance {
 
                        double trainingTime, String performanceDate, double score, List<Double> DepthArray,
                        
-                       List<Double> FreqArray, List<Double> positionArray, int status) {
+                       List<Double> FreqArray, List<Double> positionArray, int status, List<PerformanceNotes> performanceNotes) {
 
         this.id = id;
 
@@ -95,6 +97,8 @@ public class Performance {
         this.positionArray = positionArray;
 
         this.status = status;
+
+        this.performanceNotes = performanceNotes;
     }
  
     // Getters and Setters
@@ -174,6 +178,10 @@ public class Performance {
     public int getStatus() {return status;}
 
     public void setStatus(int status) {this.status = status;}
+
+    public List<PerformanceNotes> getPerformanceNotes() {return performanceNotes;  }
+
+    public void setPerformanceNotes(List<PerformanceNotes> performanceNotes) {this.performanceNotes = performanceNotes;}
 }
 
  
