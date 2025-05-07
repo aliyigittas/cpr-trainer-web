@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,12 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import static com.lpsoft.cpr_trainer_backend.CprTrainerBackendApplication.createDump;
-import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceDetailsRepository;
-import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceNotesRepository;
-import com.lpsoft.cpr_trainer_backend.interfaces.PerformanceRepository;
-import com.lpsoft.cpr_trainer_backend.interfaces.PositionDetailsRepository;
-import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
-
 
 
 
@@ -33,20 +30,6 @@ import com.lpsoft.cpr_trainer_backend.interfaces.UserRepository;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private PerformanceRepository performanceRepository;
-
-    @Autowired
-    private PerformanceDetailsRepository performanceDetailsRepository;
-
-    @Autowired
-    private PerformanceNotesRepository performanceNotesRepository;
-
-    @Autowired
-    private PositionDetailsRepository positionDetailsRepository;
 
     private final DatabaseAdapter databaseAdapter;
 
@@ -62,31 +45,33 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+        if(databaseAdapter.findByEmail(user.getEmail()).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This email is already taken.\"}");
         }
-        else if(userRepository.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
+        else if(databaseAdapter.findByUsernameAndStatus(user.getUsername(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This username is already taken.\"}");
         }
-        else if(!"".equals(user.getKhasID()) && userRepository.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
+        else if(!"".equals(user.getKhasID()) && databaseAdapter.findByKhasIDAndStatus(user.getKhasID(), 1).isPresent()){
             return ResponseEntity.status(HttpStatus.CONFLICT).body("{\"message\":\"This khas id is already taken.\"}");
         }
-        userRepository.save(user);
+        databaseAdapter.saveUser(user);
         createDump(); // Call to createDump() after saving the user
         return ResponseEntity.ok("Registration is successful.");
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
-        Optional<User> dbUser = userRepository.findByUsernameAndStatus(user.getUsername(), 1);
-        Optional<User> dbUserKhas = userRepository.findByKhasIDAndStatus(user.getKhasID(), 1);
+        Optional<User> dbUser = databaseAdapter.findByUsernameAndStatus(user.getUsername(), 1);
+        Optional<User> dbUserKhas = databaseAdapter.findByKhasIDAndStatus(user.getKhasID(), 1);
+        //System.out.println("khas:"+dbUserKhas.get().getFirstname());
+
         if (dbUser.isPresent() && user.getPassword().equals(dbUser.get().getPassword())) {
             String token = jwtUtil.generateToken(user.getUsername());
             System.out.println(token);
             return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
         } 
         else if(dbUserKhas.isPresent() && user.getPassword().equals(dbUserKhas.get().getPassword())){
-            User userKhas = userRepository.getUsernameByKhasID(user.getKhasID());
+            User userKhas = databaseAdapter.getUsernameByKhasID(user.getKhasID());
             String token = jwtUtil.generateToken(userKhas.getUsername());
             System.out.println(token);
             return ResponseEntity.ok(Collections.singletonMap("token", "Bearer " + token));
@@ -127,7 +112,7 @@ public class AuthController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token.");
             }
             // Kullanıcıyı bul
-            Optional<User> userOptional = userRepository.findByUsernameAndStatus(username, 1);
+            Optional<User> userOptional = databaseAdapter.findByUsernameAndStatus(username, 1);
             if (userOptional.isEmpty()) {
                 System.out.println("User not found.");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found.");
@@ -159,7 +144,7 @@ public class AuthController {
         if (!user.getRole().equals("admin")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
         }
-        List<User> users = userRepository.findAll();
+        List<User> users = databaseAdapter.findAllUsers();
         System.out.println("Number of users retrieved: " + users.size());
         return ResponseEntity.ok(users);
     }
@@ -183,12 +168,12 @@ public class AuthController {
         }
         
         String newRole = body.get("role");
-        Optional<User> userToUpdate = userRepository.findById(id);
+        Optional<User> userToUpdate = databaseAdapter.findById(id);
         
         if (userToUpdate.isPresent()) {
             User userToUpdateObj = userToUpdate.get();
             userToUpdateObj.setRole(newRole);
-            userRepository.save(userToUpdateObj);
+            databaseAdapter.UpdateUser(userToUpdateObj);
             createDump();
             return ResponseEntity.ok("User role updated successfully.");
         } else {
@@ -216,9 +201,9 @@ public class AuthController {
             // Performansları al
             int uid = user.getId();
             if (user.getRole().equals("instructor")) {
-                performances = performanceRepository.findAllByStatus(1);
+                performances = databaseAdapter.findAllByStatus(1);
             } else {
-                performances = performanceRepository.findByUidAndStatus(uid, 1);
+                performances = databaseAdapter.findByUidAndStatus(uid, 1);
             }
             
             //performances = performanceRepository.findByUid(uid);
@@ -228,7 +213,7 @@ public class AuthController {
             }
             // New part: Fetch depth and frequency arrays
             for (Performance perf : performances) {
-                List<PerformanceDetails> details = performanceDetailsRepository.findByPerformanceId(perf.getId());
+                List<PerformanceDetails> details = databaseAdapter.findByPerformanceId(perf.getId());
                 
                 List<Double> depthArray = new ArrayList<>();
                 List<Double> freqArray = new ArrayList<>();
@@ -246,7 +231,7 @@ public class AuthController {
             }
 
             for (Performance perf : performances) {
-                List<PositionDetails> position = positionDetailsRepository.findByPerformanceIdOrderByCompressionIdAsc(perf.getId());
+                List<PositionDetails> position = databaseAdapter.findByPerformanceIdOrderByCompressionIdAsc(perf.getId());
                 
                 List<Double> positionScore = new ArrayList<>();
                 
@@ -270,7 +255,7 @@ public class AuthController {
     @GetMapping("/getPerformanceNotes")
     public List<PerformanceNotes> getPerformanceNotes(@RequestHeader("Authorization") String authHeader, @RequestParam String param) {
         System.out.println("Performance ID: " + param);
-        List<PerformanceNotes> notes = performanceNotesRepository.findByPerformanceid(Integer.parseInt(param));
+        List<PerformanceNotes> notes = databaseAdapter.findByPerformanceid(Integer.parseInt(param));
         //take only message and sentiment part in note, it is stored in json format, parse it and return
         return notes;
     }
@@ -295,7 +280,7 @@ public class AuthController {
                 if (!user.getRole().equals("instructor")) {
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Only instructors can add notes.");
                 }
-                if(performanceNotesRepository.findByPerformanceidAndNotetype(Integer.parseInt(performanceid), notetype).isEmpty()){ //if the is no instructor note added 
+                if(databaseAdapter.findByPerformanceidAndNotetype(Integer.parseInt(performanceid), notetype).isEmpty()){ //if the is no instructor note added 
                     databaseAdapter.saveInstructorNote(Integer.parseInt(performanceid), notetype, note);
                 }
                 else{
@@ -342,7 +327,7 @@ public class AuthController {
             
             // Şifreyi güncelle
             user.setPassword(newPassword);
-            userRepository.save(user);
+            databaseAdapter.UpdateUser(user);
             createDump(); // Call to createDump() after updating the password
             
             return ResponseEntity.ok("Password changed successfully");
@@ -374,17 +359,28 @@ public class AuthController {
             }
             
             // Check if username is already taken
-            Optional<User> existingUser = userRepository.findByUsernameAndStatus(newUsername, 1);
+            Optional<User> existingUser = databaseAdapter.findByUsernameAndStatus(newUsername, 1);
             if (existingUser.isPresent() && existingUser.get().getId() != user.getId()) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Username is already taken");
             }
             
             // Update username
             user.setUsername(newUsername);
-            userRepository.save(user);
-            createDump(); // Call to createDump() after updating the username
+            System.out.println("new username:"+newUsername);
+            if(databaseAdapter.UpdateUser(user)){
+                createDump(); // Call to createDump() after updating the username
+                String newToken = jwtUtil.generateToken(newUsername);
+                System.out.println("new token:"+newToken);
+            // Return response with new token
+                return ResponseEntity.ok()
+                        .header("Authorization", "Bearer " + newToken) // Send the new token back in the header
+                        .body("Username updated successfully");
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An error occurred: ");
+            }
             
-            return ResponseEntity.ok("Username updated successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("An error occurred: " + e.getMessage());
@@ -403,7 +399,7 @@ public class AuthController {
             }
             
             // Fetch the username based on the provided uid
-            Optional<User> userDetails = userRepository.findById(uid);
+            Optional<User> userDetails = databaseAdapter.findById(uid);
             
             if (userDetails.isPresent()) {
                 String username = userDetails.get().getUsername();

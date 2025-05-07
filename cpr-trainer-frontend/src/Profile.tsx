@@ -95,7 +95,7 @@ export default function ProfilePage() {
     try {
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)token\s*=\s*([^;]*).*$)|^.*$/, "$1");
       
-      await axios.post('/api/auth/update-username', {
+      const response = await axios.post('/api/auth/update-username', {
         username: newUsername
       }, {
         headers: {
@@ -103,6 +103,18 @@ export default function ProfilePage() {
         }
       });
       
+       // Extract the new token from the response body (or header)
+       const newToken = response.headers['authorization']?.split(' ')[1] || 
+       response.data.token?.split(' ')[1];  // Try extracting from header or response body
+
+      if (newToken) {
+      // Store the new token in cookies with the "Bearer " prefix
+      const expires = new Date();
+      expires.setDate(expires.getDate() + 7); // Set expiration for 7 days if "remember me"
+      document.cookie = `token=Bearer ${newToken}; path=/; expires=${expires.toUTCString()};`;  // Session cookie with Bearer prefix
+}
+      console.log("New token stored in cookie:", newToken); // Debug log
+
       // Update state with new username
       setUserData({...userData, username: newUsername});
       setUsernameSuccess(true);

@@ -1,27 +1,13 @@
 package com.lpsoft.cpr_trainer_backend;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-
-@Entity
-@Table(name = "performancedetails")
 public class PerformanceDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id; // You need a primary key! I'll explain below.
 
-    @Column(name = "performanceId")
     private int performanceId;
 
-    @Column(name = "detailType")
     private String detailType;
 
-    @Column(name = "val")
     private Double val;
 
     // Constructors

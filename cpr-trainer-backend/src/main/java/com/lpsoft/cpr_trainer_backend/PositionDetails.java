@@ -1,17 +1,8 @@
 package com.lpsoft.cpr_trainer_backend;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
-@Entity
-@Table(name = "positiondetails")
 public class PositionDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private int performanceId;
@@ -19,6 +10,13 @@ public class PositionDetails {
     private int compressionId;
 
     private Double val;
+
+    public PositionDetails(int id, int performanceId, int compressionId, Double val) {
+        this.id = id;
+        this.performanceId = performanceId;
+        this.compressionId = compressionId;
+        this.val = val;
+    }
 
     // Getter and Setter for id
     public int getId() {

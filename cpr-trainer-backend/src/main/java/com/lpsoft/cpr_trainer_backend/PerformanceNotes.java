@@ -1,22 +1,10 @@
 package com.lpsoft.cpr_trainer_backend;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-
-@Entity
-@Table(name = "performancenotes")
 public class PerformanceNotes {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private int performanceid;
     private String notetype;
 
-    @Column(columnDefinition = "TEXT")
     private String note;
 
     // Constructors

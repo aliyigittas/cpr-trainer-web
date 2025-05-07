@@ -2,17 +2,8 @@ package com.lpsoft.cpr_trainer_backend;
 
 import java.util.List;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-@Entity
-@Table(name = "performances")
 public class Performance {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     private int uid;
