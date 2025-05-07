@@ -33,6 +33,8 @@ function PerformanceScorePopup({ performance, onClose }: PerformanceScorePopupPr
           date: perf.performanceDate,
           score: perf.score,
         }));
+        // Sort data by date in ascending order
+        formattedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
         const filteredData =
           timeFrame.includes('last10')
