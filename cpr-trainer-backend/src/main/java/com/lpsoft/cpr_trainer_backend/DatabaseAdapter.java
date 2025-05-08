@@ -487,6 +487,7 @@ public class DatabaseAdapter {
                 user.setId(rs.getInt("id"));
                 user.setFirstname(rs.getString("firstname"));
                 user.setSurname(rs.getString("surname"));
+                user.setUsername(rs.getString("username"));
                 user.setEmail(rs.getString("email"));
                 user.setPassword(rs.getString("password"));
                 user.setKhasID(rs.getString("khasID"));

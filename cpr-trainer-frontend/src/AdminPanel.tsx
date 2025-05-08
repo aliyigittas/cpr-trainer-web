@@ -23,6 +23,11 @@ function AdminPanel() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const dropdownRefs = useRef<{ [key: number]: HTMLDivElement | null }>({});
 
+  // Change page title
+  useEffect(() => {
+    document.title = "Admin Panel - CPR Trainer";
+  }, []);
+
   // Fetch user info
   useEffect(() => {
     async function getUserInfo() {

@@ -67,8 +67,8 @@ function CPRPerformanceDashboard() {
   );
   const [isNoteFilterOpen, setIsNoteFilterOpen] = useState(false);
   const noteFilterRef = useRef<HTMLDivElement | null>(null);
-  const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
-  const [instructorNote, setInstructorNote] = useState<string[]>([]);
+  //const [aiNotes, setAiNotes] = useState<PerformanceNote[]>([]);
+  //const [instructorNote, setInstructorNote] = useState<string[]>([]);
 
   // Select all feedback types
   const selectAllFeedbackTypes = (): void => {
@@ -233,6 +233,12 @@ function CPRPerformanceDashboard() {
     return selectedFeedbackTypes.join("-");
   };
 
+  // Change page title
+  useEffect(() => {
+    document.title = "Performance History - CPR Trainer";
+  }, []);
+
+
   // Fetch user info
   useEffect(() => {
     async function getUserInfo() {
@@ -335,8 +341,8 @@ function CPRPerformanceDashboard() {
         });
   
         setPerformanceNotesMap(notesMap);
-        setAiNotes(allAiNotes);
-        setInstructorNote(allInstructorNotes);
+        //setAiNotes(allAiNotes);
+        //setInstructorNote(allInstructorNotes);
   
         console.log("Notes map:", notesMap);
         console.log("Performance data retrieved:", performanceData);

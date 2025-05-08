@@ -81,6 +81,11 @@ export default function RegisterPage() {
     }
   };
 
+  // Change page title
+  useEffect(() => {
+    document.title = "Register - CPR Trainer";
+  }, []);
+
   //if user has logged in already
     useEffect(() => {
       //check if token cookie exists

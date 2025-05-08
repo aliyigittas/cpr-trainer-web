@@ -14,14 +14,19 @@ export default function LoginPage() {
   const [token, setToken] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
+  // Change page title
+  useEffect(() => {
+    document.title = "Login - CPR Trainer";
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
       console.log("Login attempt with:", { username, password });
 
-      // Backend'e POST isteği yapıyoruz
-      // Şifreyi SHA256 ile hash'liyoruz
+      // Hash the password
+      // Request to backend
       const hashedPassword = SHA256(password).toString();
       const response = await axios.post("api/auth/login", {
         username: username,
@@ -30,11 +35,11 @@ export default function LoginPage() {
         email: username,
       });
 
-      // Backend'den gelen token'ı alıyoruz
+      // Get the token from the backend
       console.log('Response from server:', response.data);
       const { token } = response.data;
 
-      // Token'ı state'e kaydediyoruz
+      // Save the token to the state
       setToken(response.data.token);
 
       console.log("Token received:", token);
@@ -44,7 +49,7 @@ export default function LoginPage() {
         expires.setDate(expires.getDate() + 7);
         document.cookie = `token=${token}; path=/; expires=${expires.toUTCString()};`;
       } else {
-        // Session cookie (tarayıcı kapanınca silinir)
+        // Session cookie (browser closes)
         document.cookie = `token=${token}; path=/;`;
       }
       // Redirect to performance history page

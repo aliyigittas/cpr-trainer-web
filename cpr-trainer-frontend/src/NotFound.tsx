@@ -1,9 +1,15 @@
 import { useNavigate } from "react-router";
 import { AlertTriangle, Home } from "lucide-react";
 import TopBar from "./TopBar";
+import { useEffect } from "react";
 
 function NotFound() {
   const navigate = useNavigate();
+
+  // Change page title
+  useEffect(() => {
+    document.title = "404 - CPR Trainer";
+  }, []);
 
   // Handle manual navigation
   const goHome = () => {

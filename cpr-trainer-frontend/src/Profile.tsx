@@ -46,6 +46,11 @@ export default function ProfilePage() {
   const [usernameError, setUsernameError] = useState('');
   const [usernameSuccess, setUsernameSuccess] = useState(false);
 
+  // Change page title
+  useEffect(() => {
+    document.title = "Profile - CPR Trainer";
+  }, []);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
