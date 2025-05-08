@@ -725,12 +725,6 @@ function CPRPerformanceDashboard() {
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      Notes
-                    </p>
-                  </div>
-
                   <div className="mt-4 flex justify-end">
                     <button
                       className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
