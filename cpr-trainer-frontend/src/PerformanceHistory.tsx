@@ -100,7 +100,7 @@ function CPRPerformanceDashboard() {
     } else if (selectedNoteStatuses.includes("noted")) {
       return "Noted Only";
     } else {
-      return "Not Noted";
+      return "Not Noted Only";
     }
   };
 
@@ -322,8 +322,9 @@ function CPRPerformanceDashboard() {
   
         sortedData.forEach((perf: Performance) => {
           let hasInstructorNote = false;
-  
-          perf.notesArray?.forEach((noteObj) => {
+          console.log("perf:", perf.performanceNotes);
+          perf.performanceNotes?.forEach((noteObj) => {
+            console.log("noteObj:", noteObj);
             // Here, we access the note's `notetype` and `note` properties directly.
             if (noteObj.notetype === "H") {
               hasInstructorNote = true;
@@ -341,8 +342,6 @@ function CPRPerformanceDashboard() {
         });
   
         setPerformanceNotesMap(notesMap);
-        //setAiNotes(allAiNotes);
-        //setInstructorNote(allInstructorNotes);
   
         console.log("Notes map:", notesMap);
         console.log("Performance data retrieved:", performanceData);

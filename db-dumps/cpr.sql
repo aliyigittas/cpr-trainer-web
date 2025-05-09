@@ -2798,7 +2798,7 @@ CREATE TABLE `performancenotes` (
   `notetype` varchar(255) DEFAULT NULL,
   `note` text,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2820,7 +2820,9 @@ INSERT INTO `performancenotes` VALUES
 (12,25,'A','[\n    {\n        \"message\": \"The average compression depth exceeds the recommended range, suggesting a need for reduced force.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The mean compression frequency is below the ideal range, indicating a slower than optimal rate.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"With a high standard deviation in depth, compression depth consistency needs significant improvement.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"No instances of excessively high compression frequency represent control over compression rate.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The overall performance score is low, highlighting areas for improvement in both depth and frequency.\",\n        \"sentiment\": \"Negative\"\n    }\n]'),
 (13,26,'A','[\n    {\n        \"message\": \"The average compression depth of 59.84 mm is within the ideal range, indicating good performance in this aspect.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The compression rate of 105.87 compressions per minute is ideal, reflecting proper frequency control during the session.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The high standard deviation in compression depth of 19.28 mm suggests a lack of depth consistency.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"Overall performance score of 58.27 indicates room for improvement in maintaining consistent quality of CPR.\",\n        \"sentiment\": \"Negative\"\n    }\n]'),
 (14,27,'A','[\n    {\n        \"message\": \"The average compression frequency is within the ideal range, indicating good frequency control.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The average compression depth is slightly below the ideal range, suggesting a need for improvement in depth quality.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"There is considerable inconsistency in compression depths as shown by the high standard deviation.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The overall performance score is moderate, showing room for improvement in CPR skills.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The frequency of compressions exceeded the ideal range in many cases, indicating potential over-speeding during training.\",\n        \"sentiment\": \"Negative\"\n    }\n]'),
-(15,28,'A','[\n    {\n        \"message\": \"The average compression depth is slightly above the minimum ideal range at 51.21 mm, indicating good depth control.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The mean compression frequency of 114.33 is within the ideal range, suggesting effective frequency management.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"A relatively high standard deviation in depth indicates inconsistency in maintaining the ideal compression depth.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The training performance score of 78.63 reflects a generally competent execution of CPR technique.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The high count of low-depth compressions (84) highlights a tendency to sometimes perform compressions shallower than ideal.\",\n        \"sentiment\": \"Negative\"\n    }\n]');
+(15,28,'A','[\n    {\n        \"message\": \"The average compression depth is slightly above the minimum ideal range at 51.21 mm, indicating good depth control.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The mean compression frequency of 114.33 is within the ideal range, suggesting effective frequency management.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"A relatively high standard deviation in depth indicates inconsistency in maintaining the ideal compression depth.\",\n        \"sentiment\": \"Negative\"\n    },\n    {\n        \"message\": \"The training performance score of 78.63 reflects a generally competent execution of CPR technique.\",\n        \"sentiment\": \"Positive\"\n    },\n    {\n        \"message\": \"The high count of low-depth compressions (84) highlights a tendency to sometimes perform compressions shallower than ideal.\",\n        \"sentiment\": \"Negative\"\n    }\n]'),
+(16,28,'H','You can do it better i believe you'),
+(17,27,'H','Frequency is good.');
 /*!40000 ALTER TABLE `performancenotes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4176,9 +4178,9 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(9,'front','end','frontend','mail@mail.com','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054','2025-03-29 16:48:10','admin',1),
-(10,'da','asd','sad','ab@a.com','a976270e7922fceaf8deaed98809e1c4f63c0898e5119a82f45d9f3be1226b23','213','2025-04-29 12:48:10','instructor',1),
-(11,'as','as','as','a@a.com','6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918','dfd','2025-01-29 16:48:10','user',1);
+(9,'Ali','Taş','aliyigittas','aliyigittas@stu.khas.edu.tr','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701054','2025-03-29 16:48:10','user',1),
+(10,'Şevval','Çetin','sevvalcetin','scetin@stu.khas.edu.tr','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701053','2025-04-29 12:48:10','admin',1),
+(11,'Baran','Aslan','baranaslan','baran.aslan@stu.khas.edu.tr','8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92','20201701003','2025-01-29 16:48:10','instructor',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -4191,4 +4193,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*M!100616 SET NOTE_VERBOSITY=@OLD_NOTE_VERBOSITY */;
 
--- Dump completed on 2025-05-07 19:39:30
+-- Dump completed on 2025-05-09 20:16:56

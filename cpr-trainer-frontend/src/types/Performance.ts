@@ -19,7 +19,7 @@ type Performance = {
     depthArray: [];
     freqArray: [];
     positionArray: [];
-    notesArray : PerformanceNote[],
+    performanceNotes : PerformanceNote[],
     status: number;
 };
 
