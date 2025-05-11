@@ -294,14 +294,28 @@ export default function RegisterPage() {
               I agree to the{" "}
               <button
                 type="button"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                onClick={() => {
+                  alert("Terms of Service: \n\n" +
+                    "1. You must not use this service for any illegal or unauthorized purpose.\n" +
+                    "2. You must not use this service to harm or threaten others.\n" +
+                    "3. You must not use this service to violate any laws or regulations.\n"
+                  );
+                }}
               >
                 Terms of Service
               </button>{" "}
               and{" "}
               <button
                 type="button"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                onClick={() => {
+                  alert("Privacy Policy: \n\n" +
+                    "1. We will not share your personal information with any third parties.\n" +
+                    "2. We will not use your personal information for any purpose other than to provide you with the service you have requested.\n" +
+                    "3. We will not sell your personal information to any third parties.\n" 
+                  );
+                }}
               >
                 Privacy Policy
               </button>
