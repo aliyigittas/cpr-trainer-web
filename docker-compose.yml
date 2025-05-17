@@ -45,8 +45,6 @@ services:
   
   db:
     image: mysql:8.3
-    ports:
-      - "3306:3306" # burası proje teslim edilince kaldırılacak dbye dışarıdan erişim olmaması için
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
